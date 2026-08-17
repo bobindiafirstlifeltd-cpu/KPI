@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>BDM Promotion Dial · KPI Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0F2438;
+    --navy-2:#16334D;
+    --navy-3:#1E4160;
+    --gold:#C89B4A;
+    --gold-light:#E8C97A;
+    --cream:#FBF8F1;
+    --paper:#FFFFFF;
+    --ink:#1B2430;
+    --ink-soft:#5B6B7C;
+    --line:#E7E0D2;
+    --success:#2E9E6B;
+    --success-bg:#E7F5EE;
+    --amber:#C98A2C;
+    --amber-bg:#FBF0DD;
+    --danger:#C24A3B;
+    --danger-bg:#FBE9E5;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:48px;
+  }
+  .wrap{max-width:520px;margin:0 auto;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- Sticky Dashboard ---------- */
+  .dash{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(160deg,var(--navy) 0%, var(--navy-2) 65%, var(--navy-3) 100%);
+    color:#fff;
+    padding:14px 18px 16px;
+    box-shadow:0 8px 24px rgba(15,36,56,.28);
+  }
+  .dash-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .brand{display:flex;align-items:center;gap:9px;}
+  .brand-mark{
+    width:30px;height:30px;border-radius:8px;
+    background:conic-gradient(from 220deg,var(--gold-light),var(--gold) 60%,#8a6a2c);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk';font-weight:700;font-size:13px;color:var(--navy);
+    flex:none;
+  }
+  .brand-text{line-height:1.15;}
+  .brand-text .t1{font-family:'Space Grotesk';font-weight:700;font-size:14.5px;letter-spacing:.2px;}
+  .brand-text .t2{font-size:10.5px;color:#B9C9D8;letter-spacing:.4px;text-transform:uppercase;}
+  .vintage-chip{
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;
+    padding:5px 11px;
+    font-size:11.5px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+
+  .dial-pair{display:flex;justify-content:space-between;gap:12px;margin-top:10px;}
+  .dial-unit{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;}
+  .dial-box{position:relative;width:100%;max-width:150px;height:82px;flex:none;}
+  .dial-box svg{width:100%;height:82px;overflow:visible;display:block;}
+  .dial-name{font-size:10px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;text-align:center;}
+  .dial-label{
+    position:absolute;left:0;right:0;bottom:2px;text-align:center;
+  }
+  .dial-label .pct{font-family:'Space Grotesk';font-weight:700;font-size:23px;line-height:1;}
+  .dial-label .sub{font-size:9px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
+
+  .dash-status{margin-top:12px;}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:999px;
+    font-size:12.5px;font-weight:700;
+    margin-bottom:8px;
+  }
+  .pill.ok{background:var(--success-bg);color:#1D7A52;}
+  .pill.warn{background:var(--amber-bg);color:#96601C;}
+  .pill.bad{background:var(--danger-bg);color:#A63A2C;}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+
+  .breakdown-mini{display:flex;gap:10px;flex-wrap:wrap;}
+  .bm-item{font-size:11px;color:#CFDCE8;}
+  .bm-item b{color:#fff;font-family:'IBM Plex Mono';font-weight:600;}
+
+  /* ---------- Layout ---------- */
+  .content{padding:16px 14px 0;}
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
+  .card-head h2{font-size:15px;font-weight:700;}
+  .card-head .eyebrow{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;font-weight:700;}
+  .card-sub{font-size:12px;color:var(--ink-soft);margin-top:-8px;margin-bottom:12px;}
+
+  label.field{display:block;margin-bottom:12px;}
+  label.field .lbl{display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
+  .field select, .field input[type=date]{
+    width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);
+    font-size:14.5px;font-family:'Inter';background:#fff;color:var(--ink);
+  }
+  .field select:focus, .field input:focus{outline:2px solid var(--gold-light);border-color:var(--gold);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .vintage-track{display:flex;align-items:center;gap:3px;overflow-x:auto;padding:4px 2px 8px;margin-top:2px;}
+  .vt-node{
+    flex:none;width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:9.5px;font-weight:700;font-family:'IBM Plex Mono';
+    background:#F0ECE1;color:#9A9282;border:1.5px solid var(--line);
+  }
+  .vt-node.done{background:var(--navy-2);color:#fff;border-color:var(--navy-2);}
+  .vt-node.now{background:var(--gold);color:#402C08;border-color:var(--gold);box-shadow:0 0 0 3px var(--amber-bg);}
+  .vt-line{flex:1;height:2px;background:var(--line);min-width:6px;}
+  .vt-line.done{background:var(--navy-2);}
+
+  /* KPI category card */
+  .kpi-card{margin-bottom:12px;}
+  .kpi-card:last-child{margin-bottom:0;}
+  .kpi-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .kpi-name{font-weight:700;font-size:13.5px;}
+  .kpi-weight{font-size:10.5px;color:var(--ink-soft);}
+  .kpi-figures{display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono';font-size:12.5px;margin-bottom:6px;}
+  .kpi-figures .ach{font-weight:600;color:var(--navy);}
+  .kpi-figures .tgt{color:var(--ink-soft);}
+  .bar-track{height:9px;background:#EFEAE0;border-radius:999px;overflow:hidden;position:relative;}
+  .bar-fill{height:100%;border-radius:999px;transition:width .5s ease;}
+  .kpi-score{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--ink-soft);}
+  .kpi-score b{color:var(--ink);}
+
+  /* month rows */
+  .month-list{display:flex;flex-direction:column;gap:10px;max-height:none;}
+
+  .quarter-block{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;}
+  .quarter-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:11px 12px;background:#F6F2E7;
+  }
+  .quarter-title{font-family:'Space Grotesk';font-weight:700;font-size:13px;color:var(--ink);}
+  .quarter-fy{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px;margin-top:1px;}
+  .quarter-toggle{
+    flex:none;
+    display:flex;align-items:center;gap:6px;
+    background:var(--navy-2);color:#fff;border:none;border-radius:999px;
+    padding:7px 12px;font-size:11.5px;font-weight:700;font-family:'IBM Plex Mono';
+    cursor:pointer;letter-spacing:.3px;
+  }
+  .quarter-toggle .qi{font-size:9px;}
+  .quarter-toggle.open{background:var(--gold);color:#402C08;}
+  .quarter-toggle:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px;}
+  .quarter-body{display:none;flex-direction:column;gap:8px;padding:10px;}
+
+  .month-card{
+    border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;
+  }
+  .month-card.current{border-color:var(--gold);background:#FFFBF2;}
+  .month-card.future{opacity:.7;}
+  .month-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .month-head .mname{font-weight:700;font-size:13px;font-family:'Space Grotesk';}
+  .month-head .mtag{font-size:10px;color:#fff;background:var(--navy-2);padding:2px 7px;border-radius:999px;font-family:'IBM Plex Mono';}
+  .month-card.current .mtag{background:var(--gold);color:#402C08;}
+  .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .m-field .m-lbl{font-size:10px;color:var(--ink-soft);display:flex;justify-content:space-between;margin-bottom:3px;}
+  .m-field .m-lbl .t{font-family:'IBM Plex Mono';color:#9A9282;}
+  .m-field input{
+    width:100%;padding:7px 8px;border:1.3px solid var(--line);border-radius:8px;
+    font-family:'IBM Plex Mono';font-size:13px;background:#fff;color:var(--ink);
+  }
+  .m-field input:focus{outline:2px solid var(--gold-light);border-color:var(--gold);}
+
+  details.collapser{margin-top:6px;}
+  details.collapser summary{
+    cursor:pointer;font-size:12px;font-weight:600;color:var(--navy-2);
+    padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px;
+  }
+  details.collapser summary::-webkit-details-marker{display:none;}
+  details.collapser summary:before{content:'▸';font-size:10px;transition:transform .15s;}
+  details.collapser[open] summary:before{transform:rotate(90deg);}
+
+  /* summary table */
+  table.summary{width:100%;border-collapse:collapse;font-size:12px;}
+  table.summary th{text-align:right;font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.3px;padding:0 4px 6px;font-weight:600;}
+  table.summary th:first-child{text-align:left;}
+  table.summary td{padding:7px 4px;text-align:right;border-top:1px solid var(--line);font-family:'IBM Plex Mono';}
+  table.summary td:first-child{text-align:left;font-family:'Inter';font-weight:600;}
+  table.summary tr.total td{border-top:2px solid var(--ink);font-weight:700;padding-top:9px;}
+
+  /* gate criteria */
+  .gate-status{display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border-radius:10px;font-size:12.5px;font-weight:600;}
+  .gate-status.ok{background:var(--success-bg);color:#1D7A52;}
+  .gate-status.bad{background:var(--danger-bg);color:#A63A2C;}
+  .gate-status.pending{background:#F0ECE1;color:#6B6250;}
+
+  /* verdict */
+  .verdict{
+    border-radius:var(--radius);
+    padding:22px 18px;
+    text-align:center;
+    color:#fff;
+    margin-bottom:14px;
+  }
+  .verdict.qualified{background:linear-gradient(135deg,#1D7A52,#2E9E6B);}
+  .verdict.notqualified{background:linear-gradient(135deg,#8A2E22,#C24A3B);}
+  .verdict .vlabel{font-family:'Space Grotesk';font-weight:700;font-size:19px;margin-bottom:4px;}
+  .verdict .vsub{font-size:12.5px;opacity:.9;}
+  .verdict .vscore{font-family:'IBM Plex Mono';font-size:13px;margin-top:10px;opacity:.95;}
+  .share-btn{
+    margin-top:16px;
+    display:inline-flex;align-items:center;gap:8px;
+    background:#fff;color:#128C4A;
+    border:none;border-radius:999px;
+    padding:11px 20px;font-size:13.5px;font-weight:700;font-family:'Inter';
+    cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.15);
+  }
+  .share-btn:hover{background:#F4FBF6;}
+  .share-btn:focus-visible{outline:2px solid #fff;outline-offset:3px;}
+
+  .assumptions{font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+  .assumptions li{margin-bottom:5px;}
+
+  .footer-note{text-align:center;font-size:10.5px;color:#A9A08B;padding:10px 20px 4px;line-height:1.6;}
+
+  ::selection{background:var(--gold-light);}
+  @media (min-width:540px){
+    .wrap{max-width:560px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= STICKY DASHBOARD ================= -->
+  <div class="dash" id="dash">
+    <div class="dash-top">
+      <div class="brand">
+        <div class="brand-mark">₹</div>
+        <div class="brand-text">
+          <div class="t1">Promotion Dial</div>
+          <div class="t2">BDM KPI Calculator</div>
+        </div>
+      </div>
+      <div class="vintage-chip" id="chipVintage">Set DOJ →</div>
+    </div>
+
+    <div class="dial-pair">
+      <div class="dial-unit">
+        <div class="dial-box">
+          <svg viewBox="0 0 150 90">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#C24A3B"/>
+                <stop offset="50%" stop-color="#C98A2C"/>
+                <stop offset="100%" stop-color="#E8C97A"/>
+              </linearGradient>
+            </defs>
+            <path d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="12" stroke-linecap="round" pathLength="100"/>
+            <path id="gaugeFill" d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          </svg>
+          <div class="dial-label">
+            <div class="pct" id="dialPct">0%</div>
+            <div class="sub">Full-year score</div>
+          </div>
+        </div>
+        <div class="dial-name">Annual Target</div>
+      </div>
+
+      <div class="dial-unit">
+        <div class="dial-box">
+          <svg viewBox="0 0 150 90">
+            <defs>
+              <linearGradient id="gaugeGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#8A2E22"/>
+                <stop offset="50%" stop-color="#2E6A9E"/>
+                <stop offset="100%" stop-color="#63C9A8"/>
+              </linearGradient>
+            </defs>
+            <path d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="12" stroke-linecap="round" pathLength="100"/>
+            <path id="gaugeFill2" d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="url(#gaugeGrad2)" stroke-width="12" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+          </svg>
+          <div class="dial-label">
+            <div class="pct" id="dialPct2">0%</div>
+            <div class="sub" id="dialSub2">Till-date pace</div>
+          </div>
+        </div>
+        <div class="dial-name" id="dialName2">Till M0 Pace</div>
+      </div>
+    </div>
+
+    <div class="dash-status">
+      <div class="pill warn" id="qualPill"><span class="dot"></span><span id="qualPillText">Fill in your details</span></div>
+      <div class="breakdown-mini">
+        <div class="bm-item">WRP <b id="bmWrp">0%</b></div>
+        <div class="bm-item">Advisor <b id="bmAdv">0%</b></div>
+        <div class="bm-item">License <b id="bmLic">0%</b></div>
+        <div class="bm-item">BA <b id="bmBa">0%</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ================= SETUP ================= -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Your Profile</h2>
+        <span class="eyebrow">Step 1</span>
+      </div>
+      <div class="row2">
+        <label class="field">
+          <span class="lbl">Designation</span>
+          <select id="desig"></select>
+        </label>
+        <label class="field">
+          <span class="lbl">Date of Joining / Promotion</span>
+          <input type="date" id="doj" value="2026-01-09">
+        </label>
+      </div>
+      <label class="field" style="margin-bottom:0;">
+        <span class="lbl">Calculate as of</span>
+        <input type="date" id="asof">
+      </label>
+
+      <div class="card-sub" style="margin-top:14px;margin-bottom:4px;">Vintage progress (M0 → current)</div>
+      <div class="vintage-track" id="vintageTrack"></div>
+    </div>
+
+    <!-- ================= MONTHLY ACHIEVEMENTS ================= -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Monthly Achievements</h2>
+        <span class="eyebrow">Step 2</span>
+      </div>
+      <div class="card-sub">Grouped by quarter through Mar-27. All quarters start hidden — tap a corner button (Q1 AMJ / Q2 JAS / Q3 OND / Q4 JFM) to reveal that quarter's months.</div>
+      <div class="month-list" id="monthList"></div>
+    </div>
+
+    <!-- ================= KPI SUMMARY ================= -->
+    <div class="card">
+      <div class="card-head">
+        <h2>KPI Scorecard</h2>
+        <span class="eyebrow">Live</span>
+      </div>
+      <div class="card-sub">Weighted against your annual target · capped at 150% achievement per category</div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-name">WRP (New Business)</span><span class="kpi-weight">Weight 50%</span></div>
+        <div class="kpi-figures"><span class="ach" id="wrpAch">₹0</span><span class="tgt" id="wrpTgt">of ₹0</span></div>
+        <div class="bar-track"><div class="bar-fill" id="wrpBar" style="width:0%;background:var(--navy-2);"></div></div>
+        <div class="kpi-score"><span>Achieved <b id="wrpPct">0%</b></span><span>Score <b id="wrpScore">0.00%</b></span></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-name">Active Advisors</span><span class="kpi-weight">Weight 20%</span></div>
+        <div class="kpi-figures"><span class="ach" id="advAch">0</span><span class="tgt" id="advTgt">of 0</span></div>
+        <div class="bar-track"><div class="bar-fill" id="advBar" style="width:0%;background:var(--navy-2);"></div></div>
+        <div class="kpi-score"><span>Achieved <b id="advPct">0%</b></span><span>Score <b id="advScore">0.00%</b></span></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-name">License Active</span><span class="kpi-weight">Weight 20% · 2/month</span></div>
+        <div class="kpi-figures"><span class="ach" id="licAch">0</span><span class="tgt" id="licTgt">of 0</span></div>
+        <div class="bar-track"><div class="bar-fill" id="licBar" style="width:0%;background:var(--navy-2);"></div></div>
+        <div class="kpi-score"><span>Achieved <b id="licPct">0%</b></span><span>Score <b id="licScore">0.00%</b></span></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-name">BA Confirmation</span><span class="kpi-weight">Weight 10% · 1/month</span></div>
+        <div class="kpi-figures"><span class="ach" id="baAch">0</span><span class="tgt" id="baTgt">of 0</span></div>
+        <div class="bar-track"><div class="bar-fill" id="baBar" style="width:0%;background:var(--navy-2);"></div></div>
+        <div class="kpi-score"><span>Achieved <b id="baPct">0%</b></span><span>Score <b id="baScore">0.00%</b></span></div>
+      </div>
+
+      <details class="collapser">
+        <summary>View full scorecard table</summary>
+        <table class="summary">
+          <tr><th>Category</th><th>Target</th><th>Ach.</th><th>%Ach</th><th>Wt</th><th>Score</th></tr>
+          <tbody id="summaryBody"></tbody>
+          <tr class="total"><td>Total Score</td><td></td><td></td><td></td><td>100%</td><td id="totalScore">0.00%</td></tr>
+        </table>
+      </details>
+    </div>
+
+    <!-- ================= GATE CRITERIA ================= -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Gate Criteria — 13th Month Persistency</h2>
+        <span class="eyebrow">Must pass</span>
+      </div>
+      <div class="card-sub">A pass here is mandatory regardless of your score. Applicable once you cross M12.</div>
+      <div class="row2">
+        <label class="field">
+          <span class="lbl">Premium Due (₹)</span>
+          <input type="number" inputmode="decimal" id="gateDue" placeholder="0">
+        </label>
+        <label class="field" style="margin-bottom:0;">
+          <span class="lbl">Premium Collected (₹)</span>
+          <input type="number" inputmode="decimal" id="gateCollected" placeholder="0">
+        </label>
+      </div>
+      <div class="gate-status pending" id="gateStatus">Not yet applicable for your vintage</div>
+    </div>
+
+    <!-- ================= VERDICT ================= -->
+    <div class="verdict notqualified" id="verdictBox">
+      <div class="vlabel" id="verdictLabel">Not Qualified for Promotion</div>
+      <div class="vsub" id="verdictSub">Score below 100% and/or gate criteria not met</div>
+      <div class="vscore" id="verdictScore">Composite Score: 0.00%</div>
+      <button type="button" class="share-btn" id="shareBtn">📲 Share Report on WhatsApp</button>
+    </div>
+
+    <!-- ================= ASSUMPTIONS ================= -->
+    <div class="card">
+      <details class="collapser">
+        <summary>How this is calculated / assumptions used</summary>
+        <ul class="assumptions">
+          <li><b>Vintage (M0–M6):</b> WRP &amp; Active Advisor targets follow the joining-vintage table exactly as issued (SAP 2.0 FY27 Q1).</li>
+          <li><b>Post M6:</b> WRP &amp; Advisor targets switch to the monthly seasonality table (Apr–Mar), repeating each fiscal year.</li>
+          <li><b>License Active:</b> simplified to a flat 2 per month from M1 onward (reaches the 24 annual target in 12 months), per your instruction.</li>
+          <li><b>BA Confirmation:</b> simplified to a flat 1 per month from M1 onward (reaches the 12 annual target in 12 months), per your instruction.</li>
+          <li><b>Score:</b> %Achievement per category is capped at 150%, then multiplied by its weight (WRP 50%, Advisor 20%, License 20%, BA 10%).</li>
+          <li><b>Promotion rule:</b> Total score ≥ 100% <i>and</i> the 13th-month persistency gate ≥ 80% (once applicable). Adjust in code if your actual cutoff differs.</li>
+          <li>All manager-band targets (ABM B5 → CBM) use the "DT" target column, which is what the monthly seasonality sheets are built on.</li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="footer-note">Loaded with a sample EBDM record (DOJ 09-Jan-26) that reproduces the "Not Qualified" result from your goal sheet — replace it with your own numbers.</div>
+  </div>
+</div>
+
+<script>
+/* ============ DATA — from SAP 2.0 FY27 Q1 BDM sheets ============ */
+const DESIG = {
+  ABDM:  {label:'ABDM',   wrp:3500000,  adv:42, lic:24, ba:12,
+    vWRP:[0,70000,105000,140000,157500,192500,210000],
+    vADV:[0,2,2,2,3,3,3],
+    pWRP:[171500,185500,231000,266000,276500,329000,241500,231000,413000,276500,283500,595000],
+    pADV:[2,2,3,3,3,4,3,3,5,3,4,7]},
+  BDM:   {label:'BDM',    wrp:4500000,  adv:50, lic:24, ba:12,
+    vWRP:[0,90000,135000,180000,202500,247500,270000],
+    vADV:[0,2,2,2,3,4,4],
+    pWRP:[220500,238500,297000,342000,355500,423000,310500,297000,531000,355500,364500,765000],
+    pADV:[2,3,3,4,4,5,4,3,6,4,4,8]},
+  SBDM:  {label:'SBDM',   wrp:6000000,  adv:55, lic:24, ba:12,
+    vWRP:[0,120000,180000,240000,270000,330000,360000],
+    vADV:[0,2,2,2,4,4,4],
+    pWRP:[294000,318000,396000,456000,474000,564000,414000,396000,708000,474000,486000,1020000],
+    pADV:[3,3,4,4,4,5,4,4,7,4,4,9]},
+  EBDM:  {label:'EBDM',   wrp:7000000,  adv:62, lic:24, ba:12,
+    vWRP:[0,140000,210000,280000,315000,385000,420000],
+    vADV:[0,2,2,3,4,5,6],
+    pWRP:[343000,371000,462000,532000,553000,658000,483000,462000,826000,553000,567000,1190000],
+    pADV:[3,3,4,5,5,6,4,4,8,5,5,10]},
+  'ABM B5': {label:'ABM B5', wrp:8000000, adv:68, lic:24, ba:12,
+    vWRP:[0,160000,240000,320000,360000,440000,480000],
+    vADV:[0,2,2,3,4,5,6],
+    pWRP:[392000,424000,528000,608000,632000,752000,552000,528000,944000,632000,648000,1360000],
+    pADV:[3,3,5,5,5,6,5,5,8,5,6,12]},
+  'ABM B6': {label:'ABM B6', wrp:9000000, adv:68, lic:24, ba:12,
+    vWRP:[0,180000,270000,360000,405000,495000,540000],
+    vADV:[0,2,2,3,4,5,6],
+    pWRP:[441000,477000,594000,684000,711000,846000,621000,594000,1062000,711000,729000,1530000],
+    pADV:[3,3,5,5,5,6,5,5,8,5,6,12]},
+  'BM B7':  {label:'BM B7',  wrp:10000000,adv:75, lic:24, ba:12,
+    vWRP:[0,200000,300000,400000,450000,550000,600000],
+    vADV:[0,2,3,4,4,5,6],
+    pWRP:[490000,530000,660000,760000,790000,940000,690000,660000,1180000,790000,810000,1700000],
+    pADV:[4,3,5,5,6,7,5,5,9,6,6,14]},
+  'BM B8':  {label:'BM B8',  wrp:11000000,adv:75, lic:24, ba:12,
+    vWRP:[0,220000,330000,440000,495000,605000,660000],
+    vADV:[0,2,3,4,4,5,6],
+    pWRP:[539000,583000,726000,836000,869000,1034000,759000,726000,1298000,869000,891000,1870000],
+    pADV:[4,3,5,5,6,7,5,5,9,6,6,14]},
+  'BM B9':  {label:'BM B9',  wrp:12000000,adv:75, lic:24, ba:12,
+    vWRP:[0,240000,360000,480000,540000,660000,720000],
+    vADV:[0,2,3,4,4,5,6],
+    pWRP:[588000,636000,792000,912000,948000,1128000,828000,792000,1416000,948000,972000,2040000],
+    pADV:[4,3,5,5,6,7,5,5,9,6,6,14]},
+  SBM:   {label:'SBM', wrp:13000000, adv:78, lic:24, ba:12,
+    vWRP:[0,260000,390000,520000,585000,715000,780000],
+    vADV:[0,2,3,4,5,6,6],
+    pWRP:[637000,689000,858000,988000,1027000,1222000,897000,858000,1534000,1027000,1053000,2210000],
+    pADV:[4,4,5,5,6,8,5,5,9,6,6,15]},
+  EBM:   {label:'EBM', wrp:14000000, adv:78, lic:24, ba:12,
+    vWRP:[0,280000,420000,560000,630000,770000,840000],
+    vADV:[0,2,3,4,5,6,6],
+    pWRP:[686000,742000,924000,1064000,1106000,1316000,966000,924000,1652000,1106000,1134000,2380000],
+    pADV:[4,4,5,5,6,8,5,5,9,6,6,15]},
+  CBM:   {label:'CBM', wrp:16000000, adv:78, lic:24, ba:12,
+    vWRP:[0,320000,480000,640000,720000,880000,960000],
+    vADV:[0,2,3,4,5,6,6],
+    pWRP:[784000,848000,1056000,1216000,1264000,1504000,1104000,1056000,1888000,1264000,1296000,2720000],
+    pADV:[4,4,5,5,6,8,5,5,9,6,6,15]}
+};
+const MAXCAP=150, W_WRP=.5, W_ADV=.2, W_LIC=.2, W_BA=.1;
+/* sample achieved data reproducing the uploaded goal sheet (EBDM, DOJ 09-Jan-26) */
+const SAMPLE_ACH = {2:{wrp:360500},3:{wrp:25000},4:{wrp:181916,adv:2,lic:2},5:{wrp:283963,adv:2,lic:1},6:{wrp:185929,adv:1,ba:1}};
+
+const $=id=>document.getElementById(id);
+const inr=n=>'₹'+Math.round(n||0).toLocaleString('en-IN');
+const monShort=d=>d.toLocaleString('en-US',{month:'short',year:'2-digit'});
+
+/* populate designation dropdown */
+const desigSel=$('desig');
+Object.keys(DESIG).forEach(k=>{
+  const o=document.createElement('option'); o.value=k; o.textContent=DESIG[k].label;
+  desigSel.appendChild(o);
+});
+desigSel.value='EBDM';
+$('asof').value=new Date().toISOString().slice(0,10);
+
+let monthState={}; // idx -> {wrp,adv,lic,ba}
+let lastReport=null;
+
+function vintageIndex(doj,asof){
+  return (asof.getFullYear()*12+asof.getMonth())-(doj.getFullYear()*12+doj.getMonth());
+}
+function postIndex(dateJS0Month){ return (dateJS0Month+9)%12; }
+
+function targetsFor(d,i){
+  const cfg=DESIG[d];
+  let wrp,adv;
+  const calDate=new Date($('doj')._d.getFullYear(),$('doj')._d.getMonth()+i,1);
+  if(i<=6){ wrp=cfg.vWRP[i]; adv=cfg.vADV[i]; }
+  else{ const pi=postIndex(calDate.getMonth()); wrp=cfg.pWRP[pi]; adv=cfg.pADV[pi]; }
+  const lic = i===0?0:2;
+  const ba = i===0?0:1;
+  return {wrp,adv,lic,ba,calDate};
+}
+
+function quarterInfo(calDate){
+  const m=calDate.getMonth(), y=calDate.getFullYear();
+  const fyStart = m>=3 ? y : y-1;
+  const fyLabel = 'FY'+String(fyStart).slice(-2)+'-'+String(fyStart+1).slice(-2);
+  let qCode,qName;
+  if(m>=3&&m<=5){qCode='Q1';qName='AMJ';}
+  else if(m>=6&&m<=8){qCode='Q2';qName='JAS';}
+  else if(m>=9&&m<=11){qCode='Q3';qName='OND';}
+  else {qCode='Q4';qName='JFM';}
+  return {key:fyLabel+'-'+qCode, fyLabel, qCode, qName, label:qCode+' '+qName};
+}
+
+function buildMonthCards(){
+  const dojVal=$('doj').value, asofVal=$('asof').value;
+  const list=$('monthList');
+  list.innerHTML='';
+  if(!dojVal||!asofVal){ list.innerHTML='<div class="card-sub">Pick a Date of Joining and a calculation date above.</div>'; return; }
+  const doj=new Date(dojVal+'T00:00:00'); const asof=new Date(asofVal+'T00:00:00');
+  $('doj')._d=doj;
+  const vi=vintageIndex(doj,asof);
+  $('chipVintage').textContent = vi<0 ? 'DOJ is in the future' : ('M'+Math.max(vi,0)+' · '+DESIG[desigSel.value].label);
+  if(vi<0){ list.innerHTML='<div class="card-sub">The calculation date is before the joining date.</div>'; renderVintageTrack(-1); return; }
+
+  const mar27=new Date(2027,2,1);
+  let maxIndex=vintageIndex(doj,mar27);
+  if(maxIndex<vi) maxIndex=vi;
+
+  const groups=[]; const groupMap={};
+  for(let i=0;i<=maxIndex;i++){
+    const t=targetsFor(desigSel.value,i);
+    if(!(i in monthState)) monthState[i] = SAMPLE_ACH[i] ? {...SAMPLE_ACH[i]} : {wrp:0,adv:0,lic:0,ba:0};
+    const q=quarterInfo(t.calDate);
+    if(!groupMap[q.key]){ groupMap[q.key]={...q,months:[]}; groups.push(groupMap[q.key]); }
+    groupMap[q.key].months.push({i,t});
+  }
+
+  groups.forEach(g=>{
+    const block=document.createElement('div');
+    block.className='quarter-block';
+    const first=g.months[0].t.calDate, last=g.months[g.months.length-1].t.calDate;
+    const rangeLabel = monShort(first)+' – '+monShort(last);
+    const containsCurrent = g.months.some(m=>m.i===vi);
+    block.innerHTML = `
+      <div class="quarter-head">
+        <div>
+          <div class="quarter-title">${rangeLabel}</div>
+          <div class="quarter-fy">${g.fyLabel}</div>
+        </div>
+        <button type="button" class="quarter-toggle" data-key="${g.key}">${g.label}<span class="qi">▸</span></button>
+      </div>
+      <div class="quarter-body" id="qb-${g.key}"></div>`;
+    list.appendChild(block);
+    const body=block.querySelector('.quarter-body');
+    g.months.forEach(({i,t})=>{
+      const st=monthState[i];
+      const isCurrent=i===vi, isFuture=i>vi;
+      const card=document.createElement('div');
+      card.className='month-card'+(isCurrent?' current':'')+(isFuture?' future':'');
+      card.innerHTML = `
+        <div class="month-head">
+          <span class="mname">${monShort(t.calDate)}</span>
+          <span class="mtag">M${i}${isCurrent?' · current':(isFuture?' · upcoming':'')}</span>
+        </div>
+        <div class="m-grid">
+          <div class="m-field">
+            <div class="m-lbl"><span>WRP ach. (₹)</span><span class="t">tgt ${t.wrp.toLocaleString('en-IN')}</span></div>
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="wrp" value="${st.wrp||''}" placeholder="0">
+          </div>
+          <div class="m-field">
+            <div class="m-lbl"><span>Advisor active</span><span class="t">tgt ${t.adv}</span></div>
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="adv" value="${st.adv||''}" placeholder="0">
+          </div>
+          <div class="m-field">
+            <div class="m-lbl"><span>License active</span><span class="t">tgt ${t.lic}</span></div>
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="lic" value="${st.lic||''}" placeholder="0">
+          </div>
+          <div class="m-field">
+            <div class="m-lbl"><span>BA confirmation</span><span class="t">tgt ${t.ba}</span></div>
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="ba" value="${st.ba||''}" placeholder="0">
+          </div>
+        </div>`;
+      body.appendChild(card);
+    });
+    const btn=block.querySelector('.quarter-toggle');
+    const setOpen=open=>{
+      body.style.display= open?'flex':'none';
+      btn.classList.toggle('open',open);
+      btn.querySelector('.qi').textContent = open?'▾':'▸';
+    };
+    setOpen(false); /* all quarters start hidden — tap the corner button to reveal */
+    btn.addEventListener('click',()=> setOpen(body.style.display==='none'));
+  });
+
+  list.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',e=>{
+      const i=e.target.dataset.i,k=e.target.dataset.k;
+      monthState[i][k]=parseFloat(e.target.value)||0;
+      computeAll();
+    });
+  });
+  renderVintageTrack(vi);
+}
+
+function renderVintageTrack(vi){
+  const track=$('vintageTrack'); track.innerHTML='';
+  if(vi<0) return;
+  const total=Math.max(vi,12);
+  for(let i=0;i<=total;i++){
+    const node=document.createElement('div');
+    node.className='vt-node'+(i<vi?' done':(i===vi?' now':''));
+    node.textContent='M'+i;
+    track.appendChild(node);
+    if(i<total){
+      const line=document.createElement('div');
+      line.className='vt-line'+(i<vi?' done':'');
+      track.appendChild(line);
+    }
+  }
+}
+
+function sumField(key){
+  let s=0; Object.values(monthState).forEach(m=>{ s += (m && m[key]) || 0; }); return s;
+}
+
+function scoreBand(pct){
+  if(pct>=100) return 'ok'; if(pct>=60) return 'warn'; return 'bad';
+}
+
+function computeAll(){
+  const dojVal=$('doj').value, asofVal=$('asof').value;
+  if(!dojVal||!asofVal) return;
+  const doj=new Date(dojVal+'T00:00:00'); const asof=new Date(asofVal+'T00:00:00');
+  const vi=vintageIndex(doj,asof);
+  if(vi<0) return;
+  const d=desigSel.value; const cfg=DESIG[d];
+
+  const wrpAch=sumField('wrp'), advAch=sumField('adv'), licAch=sumField('lic'), baAch=sumField('ba');
+  const wrpPct=cfg.wrp?wrpAch/cfg.wrp*100:0;
+  const advPct=cfg.adv?advAch/cfg.adv*100:0;
+  const licPct=cfg.lic?licAch/cfg.lic*100:0;
+  const baPct=cfg.ba?baAch/cfg.ba*100:0;
+
+  const wrpScore=Math.min(wrpPct,MAXCAP)*W_WRP;
+  const advScore=Math.min(advPct,MAXCAP)*W_ADV;
+  const licScore=Math.min(licPct,MAXCAP)*W_LIC;
+  const baScore=Math.min(baPct,MAXCAP)*W_BA;
+  const total=wrpScore+advScore+licScore+baScore;
+
+  /* ---- Till-date pace: achievement vs the cumulative target through the CURRENT vintage month (M0..Mvi) ---- */
+  let tillWrp=0, tillAdv=0, tillLic=0, tillBa=0;
+  let wrpToDate=0, advToDate=0, licToDate=0, baToDate=0;
+  for(let i=0;i<=vi;i++){
+    const t=targetsFor(d,i);
+    tillWrp+=t.wrp; tillAdv+=t.adv; tillLic+=t.lic; tillBa+=t.ba;
+    const m=monthState[i];
+    if(m){ wrpToDate+=m.wrp||0; advToDate+=m.adv||0; licToDate+=m.lic||0; baToDate+=m.ba||0; }
+  }
+  const tWrpPct=tillWrp?wrpToDate/tillWrp*100:0;
+  const tAdvPct=tillAdv?advToDate/tillAdv*100:0;
+  const tLicPct=tillLic?licToDate/tillLic*100:0;
+  const tBaPct=tillBa?baToDate/tillBa*100:0;
+  const tillTotal=Math.min(tWrpPct,MAXCAP)*W_WRP+Math.min(tAdvPct,MAXCAP)*W_ADV+Math.min(tLicPct,MAXCAP)*W_LIC+Math.min(tBaPct,MAXCAP)*W_BA;
+
+  /* KPI cards */
+  $('wrpAch').textContent=inr(wrpAch); $('wrpTgt').textContent='of '+inr(cfg.wrp);
+  $('advAch').textContent=advAch; $('advTgt').textContent='of '+cfg.adv;
+  $('licAch').textContent=licAch; $('licTgt').textContent='of '+cfg.lic;
+  $('baAch').textContent=baAch; $('baTgt').textContent='of '+cfg.ba;
+
+  $('wrpPct').textContent=wrpPct.toFixed(0)+'%'; $('wrpScore').textContent=wrpScore.toFixed(2)+'%';
+  $('advPct').textContent=advPct.toFixed(0)+'%'; $('advScore').textContent=advScore.toFixed(2)+'%';
+  $('licPct').textContent=licPct.toFixed(0)+'%'; $('licScore').textContent=licScore.toFixed(2)+'%';
+  $('baPct').textContent=baPct.toFixed(0)+'%'; $('baScore').textContent=baScore.toFixed(2)+'%';
+
+  const barColor=p=> p>=100?'var(--success)': p>=60?'var(--amber)':'var(--danger)';
+  $('wrpBar').style.width=Math.min(wrpPct,100)+'%'; $('wrpBar').style.background=barColor(wrpPct);
+  $('advBar').style.width=Math.min(advPct,100)+'%'; $('advBar').style.background=barColor(advPct);
+  $('licBar').style.width=Math.min(licPct,100)+'%'; $('licBar').style.background=barColor(licPct);
+  $('baBar').style.width=Math.min(baPct,100)+'%'; $('baBar').style.background=barColor(baPct);
+
+  /* summary table */
+  const rows=[
+    ['WRP',inr(cfg.wrp),inr(wrpAch),wrpPct.toFixed(0)+'%','50%',wrpScore.toFixed(2)+'%'],
+    ['Active Advisor',cfg.adv,advAch,advPct.toFixed(0)+'%','20%',advScore.toFixed(2)+'%'],
+    ['License Active',cfg.lic,licAch,licPct.toFixed(0)+'%','20%',licScore.toFixed(2)+'%'],
+    ['BA Confirmation',cfg.ba,baAch,baPct.toFixed(0)+'%','10%',baScore.toFixed(2)+'%'],
+  ];
+  $('summaryBody').innerHTML=rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  $('totalScore').textContent=total.toFixed(2)+'%';
+
+  /* gate criteria */
+  const due=parseFloat($('gateDue').value)||0, coll=parseFloat($('gateCollected').value)||0;
+  const gateApplicable = vi>=12;
+  let gatePass=null, gatePct=null;
+  const gs=$('gateStatus');
+  if(!gateApplicable){
+    gs.className='gate-status pending';
+    gs.textContent='Not yet applicable for your vintage (kicks in from M13)';
+  } else if(due<=0){
+    gs.className='gate-status pending';
+    gs.textContent='Enter Due & Collected premium to check the gate';
+  } else {
+    gatePct = coll/due*100;
+    gatePass = gatePct>=80;
+    gs.className='gate-status '+(gatePass?'ok':'bad');
+    gs.textContent = (gatePass?'Gate Criteria Qualified — ':'Gate Criteria Not Met — ')+gatePct.toFixed(1)+'% (target 80%)';
+  }
+
+  /* dashboard */
+  const dialPct=Math.min(total,100);
+  $('gaugeFill').setAttribute('stroke-dasharray',dialPct+' 100');
+  $('dialPct').textContent=total.toFixed(1)+'%';
+  $('bmWrp').textContent=wrpPct.toFixed(0)+'%';
+  $('bmAdv').textContent=advPct.toFixed(0)+'%';
+  $('bmLic').textContent=licPct.toFixed(0)+'%';
+  $('bmBa').textContent=baPct.toFixed(0)+'%';
+  $('chipVintage').textContent='M'+vi+' · '+cfg.label;
+
+  const dialPct2=Math.min(tillTotal,100);
+  $('gaugeFill2').setAttribute('stroke-dasharray',dialPct2+' 100');
+  $('dialPct2').textContent=tillTotal.toFixed(1)+'%';
+  $('dialSub2').textContent='vs target thru M'+vi;
+  $('dialName2').textContent='Till M'+vi+' Pace';
+
+  const scoreOk = total>=100;
+  const gateBlocking = gateApplicable && gatePass===false;
+  const qualified = scoreOk && !gateBlocking;
+
+  const pill=$('qualPill'), pillText=$('qualPillText');
+  if(qualified){
+    pill.className='pill ok'; pillText.textContent='Qualified for Promotion';
+  } else if(gateBlocking){
+    pill.className='pill bad'; pillText.textContent='Blocked — Gate criteria not met';
+  } else if(total>=60){
+    pill.className='pill warn'; pillText.textContent='On track — '+(100-total).toFixed(1)+'% score to go';
+  } else {
+    pill.className='pill bad'; pillText.textContent='Not Qualified — '+(100-total).toFixed(1)+'% score short';
+  }
+
+  const vbox=$('verdictBox');
+  if(qualified){
+    vbox.className='verdict qualified';
+    $('verdictLabel').textContent='Qualified for Promotion';
+    $('verdictSub').textContent='Score has crossed 100% and the persistency gate is satisfied.';
+  } else {
+    vbox.className='verdict notqualified';
+    $('verdictLabel').textContent='Not Qualified for Promotion';
+    $('verdictSub').textContent = gateBlocking
+      ? 'Score target met, but the 13th-month persistency gate is below 80%.'
+      : 'Composite score is below the 100% qualifying threshold.';
+  }
+  $('verdictScore').textContent='Composite Score: '+total.toFixed(2)+'%  ·  Gate: '+(gateApplicable?(gatePass?'Passed':(gatePass===false?'Failed':'Pending')):'N/A yet');
+
+  /* ---- snapshot for WhatsApp report ---- */
+  lastReport = {
+    desig:cfg.label, vintage:vi, asOf:asofVal,
+    wrp:{ach:wrpAch,tgt:cfg.wrp,pct:wrpPct,score:wrpScore},
+    adv:{ach:advAch,tgt:cfg.adv,pct:advPct,score:advScore},
+    lic:{ach:licAch,tgt:cfg.lic,pct:licPct,score:licScore},
+    ba:{ach:baAch,tgt:cfg.ba,pct:baPct,score:baScore},
+    total, tillTotal,
+    gateApplicable, gatePass, gatePct,
+    qualified
+  };
+}
+
+function buildReportText(){
+  const r=lastReport;
+  if(!r) return 'No data yet — fill in your KPI Calculator first.';
+  const gateLine = !r.gateApplicable ? 'Not yet applicable (from M13)'
+    : r.gatePct==null ? 'Pending — enter Due/Collected'
+    : (r.gatePass?'Passed':'Failed')+' — '+r.gatePct.toFixed(1)+'% (target 80%)';
+  return [
+    '*BDM KPI Report — '+r.desig+'*',
+    'Vintage: M'+r.vintage+'  ·  As of: '+r.asOf,
+    '',
+    '*WRP*: '+inr(r.wrp.ach)+' / '+inr(r.wrp.tgt)+' ('+r.wrp.pct.toFixed(0)+'%) — Score '+r.wrp.score.toFixed(2)+'%',
+    '*Active Advisor*: '+r.adv.ach+' / '+r.adv.tgt+' ('+r.adv.pct.toFixed(0)+'%) — Score '+r.adv.score.toFixed(2)+'%',
+    '*License Active*: '+r.lic.ach+' / '+r.lic.tgt+' ('+r.lic.pct.toFixed(0)+'%) — Score '+r.lic.score.toFixed(2)+'%',
+    '*BA Confirmation*: '+r.ba.ach+' / '+r.ba.tgt+' ('+r.ba.pct.toFixed(0)+'%) — Score '+r.ba.score.toFixed(2)+'%',
+    '',
+    '*Full-Year Score*: '+r.total.toFixed(2)+'%',
+    '*Till M'+r.vintage+' Pace*: '+r.tillTotal.toFixed(2)+'%',
+    '*Gate (13th M Persistency)*: '+gateLine,
+    '',
+    '*Verdict*: '+(r.qualified?'Qualified for Promotion ✅':'Not Qualified for Promotion ⏳')
+  ].join('\n');
+}
+
+function shareOnWhatsApp(){
+  const text=encodeURIComponent(buildReportText());
+  window.open('https://wa.me/?text='+text,'_blank');
+}
+
+/* ---------- events ---------- */
+['doj','asof'].forEach(id=>$(id).addEventListener('change',()=>{ monthState={}; buildMonthCards(); computeAll(); }));
+desigSel.addEventListener('change',()=>{ buildMonthCards(); computeAll(); });
+$('gateDue').addEventListener('input',computeAll);
+$('gateCollected').addEventListener('input',computeAll);
+$('shareBtn').addEventListener('click',shareOnWhatsApp);
+
+/* init */
+$('doj')._d=new Date($('doj').value+'T00:00:00');
+buildMonthCards();
+computeAll();
+</script>
+</body>
+</html>
