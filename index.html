@@ -68,6 +68,17 @@
     font-weight:600;
     white-space:nowrap;
   }
+  .dash-top-right{display:flex;align-items:center;gap:8px;flex:none;}
+  .reset-btn{
+    display:flex;align-items:center;gap:4px;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.22);
+    color:#fff;border-radius:999px;
+    padding:5px 11px;font-size:11px;font-weight:700;
+    cursor:pointer;font-family:'Inter';white-space:nowrap;
+  }
+  .reset-btn:hover{background:rgba(255,255,255,.2);}
+  .reset-btn:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px;}
 
   .dial-pair{display:flex;justify-content:space-between;gap:12px;margin-top:10px;}
   .dial-unit{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;}
@@ -256,7 +267,10 @@
           <div class="t2">BDM KPI Calculator</div>
         </div>
       </div>
-      <div class="vintage-chip" id="chipVintage">Set DOJ →</div>
+      <div class="dash-top-right">
+        <button type="button" class="reset-btn" id="resetBtn" title="Reset all entered KPI data">⟲ Reset</button>
+        <div class="vintage-chip" id="chipVintage">Set DOJ →</div>
+      </div>
     </div>
 
     <div class="dial-pair">
@@ -407,11 +421,11 @@
       <div class="row2">
         <label class="field">
           <span class="lbl">Premium Due (₹)</span>
-          <input type="number" inputmode="decimal" id="gateDue" placeholder="0">
+          <input type="number" inputmode="decimal" id="gateDue" value="0" placeholder="0">
         </label>
         <label class="field" style="margin-bottom:0;">
           <span class="lbl">Premium Collected (₹)</span>
-          <input type="number" inputmode="decimal" id="gateCollected" placeholder="0">
+          <input type="number" inputmode="decimal" id="gateCollected" value="0" placeholder="0">
         </label>
       </div>
       <div class="gate-status pending" id="gateStatus">Not yet applicable for your vintage</div>
@@ -441,7 +455,7 @@
       </details>
     </div>
 
-    <div class="footer-note">Loaded with a sample EBDM record (DOJ 09-Jan-26) that reproduces the "Not Qualified" result from your goal sheet — replace it with your own numbers.</div>
+    <div class="footer-note">All entries start at zero. Fill in your designation, joining date and monthly figures to see your live score — use Reset any time to clear everything back to zero.</div>
   </div>
 </div>
 
@@ -528,6 +542,7 @@ $('asof').value=new Date().toISOString().slice(0,10);
 
 let monthState={}; // idx -> {wrp,adv,lic,ba}
 let lastReport=null;
+let useSample=false; // starts blank — every KPI entry begins at zero
 
 function vintageIndex(doj,asof){
   return (asof.getFullYear()*12+asof.getMonth())-(doj.getFullYear()*12+doj.getMonth());
@@ -575,7 +590,7 @@ function buildMonthCards(){
   const groups=[]; const groupMap={};
   for(let i=0;i<=maxIndex;i++){
     const t=targetsFor(desigSel.value,i);
-    if(!(i in monthState)) monthState[i] = SAMPLE_ACH[i] ? {...SAMPLE_ACH[i]} : {wrp:0,adv:0,lic:0,ba:0};
+    if(!(i in monthState)) monthState[i] = (useSample && SAMPLE_ACH[i]) ? {...SAMPLE_ACH[i]} : {wrp:0,adv:0,lic:0,ba:0};
     const q=quarterInfo(t.calDate);
     if(!groupMap[q.key]){ groupMap[q.key]={...q,months:[]}; groups.push(groupMap[q.key]); }
     groupMap[q.key].months.push({i,t});
@@ -611,19 +626,19 @@ function buildMonthCards(){
         <div class="m-grid">
           <div class="m-field">
             <div class="m-lbl"><span>WRP ach. (₹)</span><span class="t">tgt ${t.wrp.toLocaleString('en-IN')}</span></div>
-            <input type="number" inputmode="decimal" data-i="${i}" data-k="wrp" value="${st.wrp||''}" placeholder="0">
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="wrp" value="${st.wrp||0}" placeholder="0">
           </div>
           <div class="m-field">
             <div class="m-lbl"><span>Advisor active</span><span class="t">tgt ${t.adv}</span></div>
-            <input type="number" inputmode="decimal" data-i="${i}" data-k="adv" value="${st.adv||''}" placeholder="0">
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="adv" value="${st.adv||0}" placeholder="0">
           </div>
           <div class="m-field">
             <div class="m-lbl"><span>License active</span><span class="t">tgt ${t.lic}</span></div>
-            <input type="number" inputmode="decimal" data-i="${i}" data-k="lic" value="${st.lic||''}" placeholder="0">
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="lic" value="${st.lic||0}" placeholder="0">
           </div>
           <div class="m-field">
             <div class="m-lbl"><span>BA confirmation</span><span class="t">tgt ${t.ba}</span></div>
-            <input type="number" inputmode="decimal" data-i="${i}" data-k="ba" value="${st.ba||''}" placeholder="0">
+            <input type="number" inputmode="decimal" data-i="${i}" data-k="ba" value="${st.ba||0}" placeholder="0">
           </div>
         </div>`;
       body.appendChild(card);
@@ -839,12 +854,29 @@ function shareOnWhatsApp(){
   window.open('https://wa.me/?text='+text,'_blank');
 }
 
+/* Dedicated reset function — forces every KPI entry (monthly WRP/Advisor/License/BA
+   achievements + the gate-criteria Due/Collected fields) back to zero.
+   Profile settings (designation, DOJ, as-of date) are left untouched. */
+function resetAll(){
+  if(!confirm('Reset all entered KPI figures to zero (monthly achievements + gate criteria)? Profile settings will stay as they are.')) return;
+
+  useSample=false;   // stop the demo numbers from being reintroduced
+  monthState={};     // wipe every stored achievement
+
+  $('gateDue').value='0';
+  $('gateCollected').value='0';
+
+  buildMonthCards();  // rebuilds every month card with monthState defaulting to {wrp:0,adv:0,lic:0,ba:0}
+  computeAll();       // recompute gauges, scorecard, gate, verdict with all-zero inputs
+}
+
 /* ---------- events ---------- */
 ['doj','asof'].forEach(id=>$(id).addEventListener('change',()=>{ monthState={}; buildMonthCards(); computeAll(); }));
 desigSel.addEventListener('change',()=>{ buildMonthCards(); computeAll(); });
 $('gateDue').addEventListener('input',computeAll);
 $('gateCollected').addEventListener('input',computeAll);
 $('shareBtn').addEventListener('click',shareOnWhatsApp);
+$('resetBtn').addEventListener('click',resetAll);
 
 /* init */
 $('doj')._d=new Date($('doj').value+'T00:00:00');
