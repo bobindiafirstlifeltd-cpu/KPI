@@ -470,6 +470,17 @@ body.admin-authenticated .admin-panel-wrap{display:block}
 }
 
 
+
+.admin-month-toolbar{
+  display:grid;grid-template-columns:minmax(180px,300px) 1fr;gap:10px;align-items:end;
+  margin:10px 0 12px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#F8F5EC
+}
+.admin-month-toolbar .month-note{font-size:10px;color:var(--ink-soft);line-height:1.4}
+.bdm-meter-wrap{margin-top:8px;display:flex;align-items:center;justify-content:center;min-height:96px}
+.bdm-meter-wrap .gauge-shell{width:150px;height:94px}
+.bdm-meter-wrap .gauge-shell .gauge-center{font-size:23px;bottom:3px}
+@media(max-width:640px){.admin-month-toolbar{grid-template-columns:1fr}.bdm-meter-wrap{min-height:88px}}
+
 @media (max-width:1100px){.branch-view-wrap,.admin-panel-wrap{max-width:none!important}}
 @media (max-width:760px){
   .branch-list-admin{grid-template-columns:1fr}
@@ -592,7 +603,7 @@ body.admin-authenticated .admin-panel-wrap{display:block}
     <!-- ================= BRANCH / BDM VIEWER ================= -->
     <div class="card branch-view-wrap" id="branchViewerCard">
       <div class="card-head">
-        <h2>Branch &amp; Manager Performance</h2>
+        <h2>Branch &amp; BDM Performance</h2>
         <span class="eyebrow">Live View</span>
       </div>
       <div class="month-selector-row">
@@ -600,28 +611,28 @@ body.admin-authenticated .admin-panel-wrap{display:block}
           <span class="lbl">Viewing Month</span>
           <select id="viewerMonth"></select>
         </label>
-        <div class="inline-note" id="viewerMonthNote">Branch and Manager KPI values are read-only for normal users. Admin changes recalculate this view automatically.</div>
+        <div class="inline-note" id="viewerMonthNote">Branch and BDM KPI values are read-only for normal users. Admin changes recalculate this view automatically.</div>
       </div>
       <div class="branch-summary-grid">
         <div class="summary-tile"><div class="st-label">Total Branches</div><div class="st-value" id="sumBranches">0</div><div class="st-sub">configured</div></div>
-        <div class="summary-tile"><div class="st-label">Total Managers</div><div class="st-value" id="sumBdms">0</div><div class="st-sub">maximum 6 / branch</div></div>
-        <div class="summary-tile"><div class="st-label">Current Month KPI</div><div class="st-value" id="sumKpi">0.0%</div><div class="st-sub">aggregate score</div></div>
+        <div class="summary-tile"><div class="st-label">Total BDMs</div><div class="st-value" id="sumBdms">0</div><div class="st-sub">maximum 6 / branch</div></div>
+        <div class="summary-tile"><div class="st-label">KPI Till Date</div><div class="st-value" id="sumKpi">0.0%</div><div class="st-sub">aggregate score</div></div>
         <div class="summary-tile"><div class="st-label">Upcoming KPI</div><div class="st-value" id="sumUpcoming">0.0%</div><div class="st-sub" id="sumUpcomingMonth">next month</div></div>
-        <div class="summary-tile"><div class="st-label">Overall Achievement</div><div class="st-value" id="sumAchievement">₹0</div><div class="st-sub">WRP for selected month</div></div>
+        <div class="summary-tile"><div class="st-label">Overall Achievement</div><div class="st-value" id="sumAchievement">₹0</div><div class="st-sub">WRP till selected date</div></div>
       </div>
     </div>
 
     <div class="card branch-view-wrap">
       <div class="card-head">
         <h2>Branch KPI Dashboard</h2>
-        <span class="eyebrow">Formula Based</span>
+        <span class="eyebrow">Till-Date Formula</span>
       </div>
       <div id="branchDashboard"></div>
     </div>
 
     <div class="card branch-view-wrap">
       <div class="card-head">
-        <h2>Manager Ranking</h2>
+        <h2>BDM Ranking</h2>
         <span class="eyebrow">Highest → Lowest</span>
       </div>
       <div id="bdmRanking" class="ranking-list"></div>
@@ -1187,7 +1198,7 @@ computeAll();
     <div class="admin-head">
       <div>
         <h2>Admin Dashboard</h2>
-        <p>Manage Branch → Manager → monthly KPI inputs without changing the existing KPI formula engine.</p>
+        <p>Manage Branch → BDM → monthly KPI inputs without changing the existing KPI formula engine.</p>
       </div>
       <div class="admin-head-actions">
         <button type="button" class="admin-action secondary" id="adminRefreshBtn">↻ Recalculate</button>
@@ -1198,7 +1209,7 @@ computeAll();
     <div class="admin-body">
       <div class="admin-status">
         <div class="lock-status status-edit" id="configStatusText">Configuration Status: EDIT MODE<small>Admin-only editing is enabled.</small></div>
-        <div class="counter" id="adminSelectedCounter">Select a branch to manage Managers.</div>
+        <div class="counter" id="adminSelectedCounter">Select a branch to manage BDMs.</div>
       </div>
 
       <div class="admin-grid">
@@ -1206,7 +1217,7 @@ computeAll();
           <div class="section-title-row">
             <div>
               <h3>Branch Management</h3>
-              <div class="section-caption">Create and manage multiple branches. Each branch can have up to 6 Managers.</div>
+              <div class="section-caption">Create and manage multiple branches. Each branch can have up to 6 BDMs.</div>
             </div>
             <div class="branch-count-badge" id="adminBranchCount">0 Branches</div>
           </div>
@@ -1219,7 +1230,7 @@ computeAll();
             <div class="admin-note">There is no overall branch limit. Branch names must be unique. Adding a branch automatically selects it for BDM setup.</div>
           </form>
           <div class="branch-list-admin" id="adminBranchList"></div>
-          <div class="selected-branch-strip" id="adminSelectedBranchStrip">Select a branch to manage Managers.</div>
+          <div class="selected-branch-strip" id="adminSelectedBranchStrip">Select a branch to manage BDMs.</div>
           <div class="rename-row">
             <input id="branchRenameInput" type="text" maxlength="80" placeholder="Rename selected branch">
             <button class="admin-action secondary light-btn" type="button" id="renameBranchBtn">Rename Selected</button>
@@ -1227,22 +1238,31 @@ computeAll();
         </div>
 
         <div class="admin-section">
-          <h3>Selected Branch — Manager Management</h3>
+          <h3>Selected Branch — BDM Management</h3>
           <div class="admin-toolbar">
-            <div>
-              <label for="adminBranchSelect">Selected Branch</label>
-              <select id="adminBranchSelect"></select>
-            </div>
-            <div class="manager-entry-info">
-              <label>Monthly Data Entry</label>
-              <div class="counter" id="adminMonthStatus">Every Manager will have monthly input fields from their Joining Month through the Current Month.</div>
-            </div>
-          </div>
+             <div>
+               <label for="adminBranchSelect">Selected Branch</label>
+               <select id="adminBranchSelect"></select>
+             </div>
+             <div class="BDM-entry-info">
+               <label>BDM Data Entry</label>
+               <div class="counter" id="adminSelectedCounterTop">Select a branch to manage BDMs.</div>
+             </div>
+           </div>
+           <div class="admin-month-toolbar">
+             <label class="field compact" style="margin:0;">
+               <span class="lbl">Admin Input Month</span>
+               <select id="adminInputMonth" aria-label="Admin input month"></select>
+             </label>
+             <div class="month-note" id="adminMonthStatus">
+               Select Current Month, Upcoming Month, or another planning month. Saved values remain separated by month and never overwrite other months.
+             </div>
+           </div>
           <form class="admin-form" id="bdmForm" novalidate>
             <div class="admin-row2">
               <div>
-                <label for="bdmNameInput">Manager Name</label>
-                <input id="bdmNameInput" type="text" maxlength="80" placeholder="Enter Manager name">
+                <label for="bdmNameInput">BDM Name</label>
+                <input id="bdmNameInput" type="text" maxlength="80" placeholder="Enter BDM name">
               </div>
               <div>
                 <label for="bdmDesigInput">Designation</label>
@@ -1255,13 +1275,13 @@ computeAll();
                 <input id="bdmDojInput" type="date" value="2026-01-09">
               </div>
               <div style="display:flex;align-items:end;">
-                <button class="admin-action primary" type="submit" style="width:100%;">Add Manager</button>
+                <button class="admin-action primary" type="submit" style="width:100%;">Add BDM</button>
               </div>
             </div>
           </form>
-          <div class="counter" id="bdmCounter">Managers Added: 0 / 6</div>
+          <div class="counter" id="bdmCounter">BDMs Added: 0 / 6</div>
           <div class="admin-bdm-list" id="adminBdmList"></div>
-          <div class="admin-note">Targets shown here are generated from the existing designation/vintage/seasonality logic. Editable fields are achievements only: WRP, Active Advisor, License Active and BA Confirmation.</div>
+          <div class="admin-note">Targets shown here are generated from the existing designation/vintage/seasonality logic. Editable fields reuse the existing inputs: WRP, Active Advisor, License Active, BA Confirmation, plus the existing M13+ gate Due/Collected fields.</div>
         </div>
       </div>
     </div>
@@ -1315,6 +1335,7 @@ computeAll();
   let adminData = loadAdminData();
   let selectedBranchId = adminData.branches[0]?.id || '';
   let selectedViewerMonth = currentMonthKey();
+  let selectedAdminInputMonth = currentMonthKey();
   let configLocked = !!adminData.locked;
 
   function uid(prefix='id'){
@@ -1353,6 +1374,7 @@ computeAll();
     if(!raw || typeof raw!=='object') return safe;
     safe.version=1;
     safe.locked=raw.locked===true;
+    const seenBranches=new Set();
     safe.branches=Array.isArray(raw.branches)?raw.branches.map((b)=>({
       id:String(b?.id||uid('br')),
       name:String(b?.name||'').trim() || 'Unnamed Branch',
@@ -1361,14 +1383,26 @@ computeAll();
         name:String(m?.name||'').trim() || 'Unnamed BDM',
         desigKey: DESIG[m?.desigKey] ? m.desigKey : 'BDM',
         doj: /^\d{4}-\d{2}-\d{2}$/.test(m?.doj||'') ? m.doj : '2026-01-09',
-        monthlyData: typeof m?.monthlyData==='object' && m.monthlyData ? Object.fromEntries(Object.entries(m.monthlyData).map(([k,v])=>[
-          k, {
-            wrp:toNonNegative(v?.wrp), adv:toNonNegative(v?.adv), lic:toNonNegative(v?.lic), ba:toNonNegative(v?.ba),
-            gateDue:toNonNegative(v?.gateDue), gateCollected:toNonNegative(v?.gateCollected)
-          }
-        ])) : {}
+        monthlyData: typeof m?.monthlyData==='object' && m.monthlyData ? Object.fromEntries(Object.entries(m.monthlyData)
+          .filter(([k])=>/^\d{4}-\d{2}$/.test(k))
+          .map(([k,v])=>[
+            k,{wrp:toNonNegative(v?.wrp),adv:toNonNegative(v?.adv),lic:toNonNegative(v?.lic),ba:toNonNegative(v?.ba),
+               gateDue:toNonNegative(v?.gateDue),gateCollected:toNonNegative(v?.gateCollected)}
+          ])) : {}
       })):[]
-    })):[];
+    })).filter(b=>{
+      const key=b.name.toLowerCase();
+      if(seenBranches.has(key)) return false;
+      seenBranches.add(key);
+      const seenBdms=new Set();
+      b.bdms=b.bdms.filter(m=>{
+        const key=m.name.toLowerCase();
+        if(seenBdms.has(key)) return false;
+        seenBdms.add(key);
+        return true;
+      });
+      return true;
+    }):[];
     return safe;
   }
 
@@ -1446,11 +1480,13 @@ computeAll();
       const d = bdm.monthlyData?.[monthKeyForDate(t.calDate)] || cloneMetricData();
       wrpTD += d.wrp||0; advTD += d.adv||0; licTD += d.lic||0; baTD += d.ba||0;
     }
+    const tillTargets={wrp:tillWrp,adv:tillAdv,lic:tillLic,ba:tillBa};
+    const tillActual={wrp:wrpTD,adv:advTD,lic:licTD,ba:baTD};
     const tdPct = {
-      wrp: tillWrp ? wrpTD/tillWrp*100 : 0,
-      adv: tillAdv ? advTD/tillAdv*100 : 0,
-      lic: tillLic ? licTD/tillLic*100 : 0,
-      ba: tillBa ? baTD/tillBa*100 : 0
+      wrp: tillTargets.wrp ? tillActual.wrp/tillTargets.wrp*100 : 0,
+      adv: tillTargets.adv ? tillActual.adv/tillTargets.adv*100 : 0,
+      lic: tillTargets.lic ? tillActual.lic/tillTargets.lic*100 : 0,
+      ba: tillTargets.ba ? tillActual.ba/tillTargets.ba*100 : 0
     };
     const tillTotal =
       Math.min(tdPct.wrp,MAXCAP)*W_WRP +
@@ -1464,7 +1500,7 @@ computeAll();
     const gatePass=!gateApplicable ? null : (gatePct==null ? null : gatePct>=80);
     const qualified=total>=100 && !(gateApplicable && gatePass===false);
 
-    return {vi,targets,actual,wrpPct:pct.wrp,advPct:pct.adv,licPct:pct.lic,baPct:pct.ba,total,tillTotal,
+    return {vi,targets,actual,tillTargets,tillActual,wrpPct:pct.wrp,advPct:pct.adv,licPct:pct.lic,baPct:pct.ba,total,tillTotal,
       gateApplicable,gatePct,gatePass,qualified,selectedDate};
   }
 
@@ -1489,10 +1525,15 @@ computeAll();
   function calculateBranch(branch, monthKey){
     const bdms=Array.isArray(branch.bdms)?branch.bdms:[];
     const rows=bdms.map(bdm=>({bdm,kpi:calculateBDMKpi(bdm,monthKey)}));
+    // Branch KPI is intentionally calculated till date, using aggregated
+    // BDM till-date targets and achievements. It does not average BDM KPIs.
     const targets={wrp:0,adv:0,lic:0,ba:0};
     const actual={wrp:0,adv:0,lic:0,ba:0};
     rows.forEach(({kpi})=>{
-      METRICS.forEach(k=>{targets[k]+=kpi.targets[k]||0;actual[k]+=kpi.actual[k]||0;});
+      METRICS.forEach(k=>{
+        targets[k]+=kpi.tillTargets?.[k]||0;
+        actual[k]+=kpi.tillActual?.[k]||0;
+      });
     });
     const pct={
       wrp:targets.wrp?actual.wrp/targets.wrp*100:0,
@@ -1525,12 +1566,27 @@ computeAll();
     return monthKeyForDate(d);
   }
 
-  function ensureMonthOptions(select){
+  function monthRangeKeys(before=12, after=24){
+    const now=new Date();
+    const start=new Date(now.getFullYear(),now.getMonth()-before,1);
+    return addMonthKeys(start.getFullYear(),start.getMonth()+1,before+after+1);
+  }
+
+  function ensureMonthOptions(select, before=12, after=24){
     if(!select) return;
-    const keys=addMonthKeys(2026,1,48);
+    const keys=monthRangeKeys(before,after);
     const existing=String(select.value||'');
-    select.innerHTML=keys.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
+    select.innerHTML=keys.map(k=>`<option value="${escapeHtml(k)}">${escapeHtml(monthLabel(k))}</option>`).join('');
     select.value=keys.includes(existing)?existing:(keys.includes(currentMonthKey())?currentMonthKey():keys[0]);
+  }
+
+  function updateAdminInputMonth(){
+    const sel=$('adminInputMonth');
+    if(!sel) return;
+    ensureMonthOptions(sel,12,24);
+    const keys=monthRangeKeys(12,24);
+    if(!keys.includes(selectedAdminInputMonth)) selectedAdminInputMonth=currentMonthKey();
+    sel.value=selectedAdminInputMonth;
   }
 
   function renderAdminDesignationOptions(){
@@ -1563,7 +1619,7 @@ computeAll();
     $('adminBranchCount').textContent=`${adminData.branches.length} Branch${adminData.branches.length===1?'':'es'}`;
     list.innerHTML=adminData.branches.map(b=>`
       <div class="branch-admin-item ${b.id===selectedBranchId?'selected':''}">
-        <div style="min-width:0"><strong><span class="branch-select-dot"></span>${escapeHtml(b.name)}</strong><small>Managers: ${b.bdms.length}/${MAX_BDMS}</small></div>
+        <div style="min-width:0"><strong><span class="branch-select-dot"></span>${escapeHtml(b.name)}</strong><small>BDMs: ${b.bdms.length}/${MAX_BDMS}</small></div>
         <div class="admin-mini-actions"><button type="button" class="mini-btn" data-select-branch="${escapeHtml(b.id)}">Manage</button></div>
       </div>`).join('');
     renderAdminBdmList();
@@ -1586,7 +1642,7 @@ computeAll();
     const selected=getBranchById(selectedBranchId);
     const selectedText=selected
       ? `${selected.name} · ${selected.bdms.length}/${MAX_BDMS} BDMs`
-      : 'Select a branch to manage Managers.';
+      : 'Select a branch to manage BDMs.';
     if($('adminSelectedCounter')) $('adminSelectedCounter').textContent=selectedText;
     if($('adminSelectedBranchStrip')) $('adminSelectedBranchStrip').textContent=selectedText;
   }
@@ -1605,71 +1661,93 @@ computeAll();
     if(!wrap) return;
     if(!branch){
       wrap.innerHTML='<div class="empty-state">Create or select a branch first.</div>';
-      $('bdmCounter').textContent='Managers Added: 0 / 6';
+      $('bdmCounter').textContent='BDMs Added: 0 / 6';
       return;
     }
 
-    $('bdmCounter').textContent=`Managers Added: ${branch.bdms.length} / ${MAX_BDMS}`;
+    $('bdmCounter').textContent=`BDMs Added: ${branch.bdms.length} / ${MAX_BDMS}`;
+    if($('adminSelectedCounterTop')) $('adminSelectedCounterTop').textContent=`${branch.name} · ${branch.bdms.length}/${MAX_BDMS} BDMs`;
     if(!branch.bdms.length){
-      wrap.innerHTML='<div class="empty-state">No Managers in this branch yet. Add up to 6.</div>';
+      wrap.innerHTML='<div class="empty-state">No BDMs in this branch yet. Add up to 6.</div>';
       disableAdminControls();
       return;
     }
 
-    const currentKey=currentMonthKey();
+    const monthKey=selectedAdminInputMonth || currentMonthKey();
+    const monthIsCurrent=monthKey===currentMonthKey();
+    const monthIsFuture=monthKey>currentMonthKey();
+
     wrap.innerHTML=branch.bdms.map((bdm)=>{
-      const dojDate=new Date((bdm.doj || currentKey+'-01')+'T00:00:00');
+      const dojDate=new Date((bdm.doj || currentMonthKey()+'-01')+'T00:00:00');
       const joiningMonth=monthKeyForDate(new Date(dojDate.getFullYear(),dojDate.getMonth(),1));
-      const months=[];
-      let cursor=new Date(dojDate.getFullYear(),dojDate.getMonth(),1);
-      const endDate=new Date();
-      const endMonth=new Date(endDate.getFullYear(),endDate.getMonth(),1);
-      while(cursor<=endMonth && months.length<60){
-        months.push(monthKeyForDate(cursor));
-        cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);
-      }
-      const hasMonths=months.length>0;
+      const d=bdm.monthlyData?.[monthKey] || cloneMetricData();
+      const kpi=calculateBDMKpi(bdm,monthKey);
+      const t=kpi.targets;
+      const status=statusBand(kpi.tillTotal);
+      const canEditThisMonth=monthKey>=joiningMonth;
+      const gateLabel=kpi.gateApplicable ? (kpi.gatePct==null?'Pending':kpi.gatePct.toFixed(1)+'%') : 'N/A';
+
       return `
-      <div class="admin-bdm">
+      <article class="admin-bdm">
         <div class="admin-bdm-top">
           <div>
-            <div class="admin-bdm-title">Manager — ${escapeHtml(bdm.name)}</div>
-            <div class="admin-bdm-sub">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)} · Joining ${escapeHtml(bdm.doj)} · ${months.length} month${months.length===1?'':'s'} available</div>
+            <div class="admin-bdm-title">BDM — ${escapeHtml(bdm.name)}</div>
+            <div class="admin-bdm-sub">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)} · Joining ${escapeHtml(bdm.doj)} · ${monthLabel(monthKey)} · ${monthIsFuture?'UPCOMING':(monthIsCurrent?'CURRENT':'HISTORY')}</div>
           </div>
           <div class="admin-bdm-controls">
             <button type="button" class="mini-btn" data-edit-bdm="${escapeHtml(bdm.id)}">Edit</button>
             <button type="button" class="mini-btn" data-delete-bdm="${escapeHtml(bdm.id)}">Remove</button>
           </div>
         </div>
-        <div class="monthly-entry-head">
-          <div><strong>Monthly KPI Entry</strong><span>Enter actual values for every month from Joining Month to Current Month.</span></div>
-          <div class="monthly-entry-range">${hasMonths ? monthLabel(months[0])+' → '+monthLabel(months[months.length-1]) : 'No current-month entry window'}</div>
+
+        <div class="admin-bdm-month">
+          <div class="fieldx">
+            <label>WRP Achievement</label>
+            <input min="0" step="any" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${escapeHtml(monthKey)}" data-metric="wrp" value="${d.wrp||0}" ${canEditThisMonth?'':'disabled'}>
+            <div class="admin-target">Target ${inr(t.wrp)}</div>
+          </div>
+          <div class="fieldx">
+            <label>Active Advisors</label>
+            <input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${escapeHtml(monthKey)}" data-metric="adv" value="${d.adv||0}" ${canEditThisMonth?'':'disabled'}>
+            <div class="admin-target">Target ${t.adv||0}</div>
+          </div>
+          <div class="fieldx">
+            <label>License Active</label>
+            <input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${escapeHtml(monthKey)}" data-metric="lic" value="${d.lic||0}" ${canEditThisMonth?'':'disabled'}>
+            <div class="admin-target">Target ${t.lic||0}</div>
+          </div>
+          <div class="fieldx">
+            <label>BA Confirmation</label>
+            <input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${escapeHtml(monthKey)}" data-metric="ba" value="${d.ba||0}" ${canEditThisMonth?'':'disabled'}>
+            <div class="admin-target">Target ${t.ba||0}</div>
+          </div>
+          <div class="fieldx">
+            <label>Premium Due (₹)</label>
+            <input min="0" step="any" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${escapeHtml(monthKey)}" data-metric="gateDue" value="${d.gateDue||0}" ${canEditThisMonth?'':'disabled'}>
+            <div class="admin-target">Existing M13+ gate input</div>
+          </div>
+          <div class="fieldx">
+            <label>Premium Collected (₹)</label>
+            <input min="0" step="any" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${escapeHtml(monthKey)}" data-metric="gateCollected" value="${d.gateCollected||0}" ${canEditThisMonth?'':'disabled'}>
+            <div class="admin-target">Existing M13+ gate input</div>
+          </div>
         </div>
-        ${hasMonths ? `<div class="manager-month-list">${months.map((monthKey)=>{
-          const d=bdm.monthlyData?.[monthKey] || cloneMetricData();
-          const kpi=calculateBDMKpi(bdm,monthKey);
-          const t=kpi.targets;
-          const isCurrent=monthKey===currentKey;
-          return `
-          <div class="manager-month-card ${isCurrent?'current-month':''}">
-            <div class="manager-month-title"><span>${monthLabel(monthKey)}</span>${isCurrent?'<b>CURRENT</b>':''}</div>
-            <div class="admin-bdm-month">
-              <div class="fieldx"><label>WRP Achievement</label><input min="0" step="any" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="wrp" value="${d.wrp||0}"><div class="admin-target">Target ${inr(t.wrp)}</div></div>
-              <div class="fieldx"><label>Active Advisors</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="adv" value="${d.adv||0}"><div class="admin-target">Target ${t.adv||0}</div></div>
-              <div class="fieldx"><label>License Active</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="lic" value="${d.lic||0}"><div class="admin-target">Target ${t.lic||0}</div></div>
-              <div class="fieldx"><label>BA Confirmation</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="ba" value="${d.ba||0}"><div class="admin-target">Target ${t.ba||0}</div></div>
-            </div>
-            <div class="month-kpi-line"><span>Monthly KPI <strong>${kpi.total.toFixed(1)}%</strong></span><span>${escapeHtml(statusBand(kpi.total).label)}</span></div>
-          </div>`;
-        }).join('')}</div>` : '<div class="empty-state">Joining date is after the current month, so there is no month available for entry yet.</div>'}
-      </div>`;
+
+        <div class="month-kpi-line" data-admin-kpi-line="${escapeHtml(bdm.id)}">
+          <span>BDM KPI Till Date <strong>${kpi.tillTotal.toFixed(1)}%</strong></span>
+          <span>${escapeHtml(status.label)} · Gate ${escapeHtml(gateLabel)}</span>
+        </div>
+        ${monthIsFuture ? '<div class="admin-note">Upcoming-month planning is isolated from the current month. These saved values become active when that month is selected in the viewer.</div>':''}
+        ${!canEditThisMonth ? '<div class="admin-note">This month is before the BDM joining month, so its KPI inputs remain disabled.</div>':''}
+      </article>`;
     }).join('');
     disableAdminControls();
   }
 
   function updateViewerMonths(){
-    ensureMonthOptions($('viewerMonth'));
+    ensureMonthOptions($('viewerMonth'),12,24);
     $('viewerMonth').value=selectedViewerMonth;
+    updateAdminInputMonth();
   }
 
   function renderBranchDashboard(){
@@ -1686,11 +1764,11 @@ computeAll();
     let overallWRP=0;
     adminData.branches.forEach(b=>overallWRP+=calculateBranch(b,month).actual.wrp);
     $('sumAchievement').textContent=inr(overallWRP);
-    $('viewerMonthNote').textContent=`Viewing ${monthLabel(month)} · Upcoming ${monthLabel(next)} · read-only viewer mode.`;
+    $('viewerMonthNote').textContent=`Viewing through ${monthLabel(month)} · KPI is calculated till date · Upcoming ${monthLabel(next)} is planning only.`;
 
     if(!adminData.branches.length){
-      wrap.innerHTML='<div class="empty-state">No Branch/Manager data has been configured yet. An authenticated admin can create the structure.</div>';
-      ranking.innerHTML='<div class="empty-state">Manager ranking will appear after Managers are added.</div>';
+      wrap.innerHTML='<div class="empty-state">No Branch/BDM data has been configured yet. An authenticated admin can create the structure.</div>';
+      ranking.innerHTML='<div class="empty-state">BDM ranking will appear after BDMs are added.</div>';
       return;
     }
 
@@ -1701,7 +1779,7 @@ computeAll();
       const gaugeId='g_branch_'+branch.id.replace(/[^a-zA-Z0-9_-]/g,'');
       branch.bdms.forEach(bdm=>{
         const kpi=calculateBDMKpi(bdm,month);
-        rankingRows.push({name:bdm.name,branch:branch.name,total:kpi.total,id:bdm.id});
+        rankingRows.push({name:bdm.name,branch:branch.name,total:kpi.tillTotal,id:bdm.id});
       });
       return `
       <article class="branch-card">
@@ -1725,15 +1803,16 @@ computeAll();
           <div class="bdm-grid">
             ${branch.bdms.map(bdm=>{
               const kpi=calculateBDMKpi(bdm,month);
-              const band=statusBand(kpi.total);
-              const bar=Math.min(kpi.total,100);
+              const band=statusBand(kpi.tillTotal);
+              const bar=Math.min(kpi.tillTotal,100);
               return `
               <article class="bdm-card">
                 <div class="bdm-head">
-                  <div><div class="bdm-name">Manager — ${escapeHtml(bdm.name)}</div><div class="bdm-desig">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)}</div></div>
-                  <div class="bdm-score">${kpi.total.toFixed(1)}%</div>
+                  <div><div class="bdm-name">BDM — ${escapeHtml(bdm.name)}</div><div class="bdm-desig">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)}</div></div>
+                  <div class="bdm-score">${kpi.tillTotal.toFixed(1)}%</div>
                 </div>
-                <div class="bdm-facts">
+                                 <div class="bdm-meter-wrap">${renderGauge('g_bdm_'+bdm.id.replace(/[^a-zA-Z0-9_-]/g,''),kpi.tillTotal,'BDM KPI Till Date')}</div>
+                 <div class="bdm-facts">
                   <div class="bdm-fact">Target <b>${inr(kpi.targets.wrp)}</b></div>
                   <div class="bdm-fact">Achievement <b>${inr(kpi.actual.wrp)}</b></div>
                   <div class="bdm-fact">Advisor <b>${kpi.actual.adv} / ${kpi.targets.adv}</b></div>
@@ -1752,9 +1831,9 @@ computeAll();
     ranking.innerHTML=rankingRows.length?rankingRows.map((x,i)=>`
       <div class="rank-row">
         <div class="rank-num">${i+1}</div>
-        <div><div class="rank-name">Manager — ${escapeHtml(x.name)}</div><div class="rank-branch">${escapeHtml(x.branch)}</div></div>
+        <div><div class="rank-name">BDM — ${escapeHtml(x.name)}</div><div class="rank-branch">${escapeHtml(x.branch)}</div></div>
         <div class="rank-kpi">${x.total.toFixed(1)}%</div>
-      </div>`).join(''):'<div class="empty-state">No Managers available.</div>';
+      </div>`).join(''):'<div class="empty-state">No BDMs available.</div>';
   }
 
   function renderGauge(id, value, label){
@@ -1851,7 +1930,7 @@ computeAll();
     persist(); renderAll(); $('branchNameInput').value='';
     $('branchRenameInput').value=branch.name;
     $('bdmNameInput').focus();
-    showToast(`${branch.name} added. Now add up to 6 Managers.`);
+    showToast(`${branch.name} added. Now add up to 6 BDMs.`);
   }
 
   function renameSelectedBranch(){
@@ -1870,19 +1949,19 @@ computeAll();
     if(!branch) return;
     const bdm=getBdm(branch,id);
     if(!bdm) return;
-    if(!confirm(`Remove Manager — ${bdm.name}? This removes only this BDM from the selected branch and deletes its stored monthly data.`)) return;
+    if(!confirm(`Remove BDM — ${bdm.name}? This removes only this BDM from the selected branch and deletes its stored monthly data.`)) return;
     branch.bdms=branch.bdms.filter(x=>x.id!==id);
-    persist(); renderAll(); showToast('Manager removed.');
+    persist(); renderAll(); showToast('BDM removed.');
   }
 
   function editBdm(id){
     if(!requireEditable()) return;
     const branch=getBranchById(selectedBranchId); const bdm=getBdm(branch,id); if(!bdm) return;
-    const name=prompt('Manager Name',bdm.name);
+    const name=prompt('BDM Name',bdm.name);
     if(name===null) return;
     const clean=name.trim();
-    if(!clean){showToast('Manager name cannot be blank.');return;}
-    if(bdmNameDuplicate(branch,clean,bdm.id)){showToast('Duplicate Manager name within this branch is not allowed.');return;}
+    if(!clean){showToast('BDM name cannot be blank.');return;}
+    if(bdmNameDuplicate(branch,clean,bdm.id)){showToast('Duplicate BDM name within this branch is not allowed.');return;}
     const desig=prompt('Designation key ('+Object.keys(DESIG).join(', ')+')',bdm.desigKey);
     if(desig===null) return;
     if(!DESIG[desig]){showToast('Invalid designation. Use one of the existing designation keys.');return;}
@@ -1890,41 +1969,47 @@ computeAll();
     if(doj===null) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(doj)){showToast('Invalid DOJ. Use YYYY-MM-DD.');return;}
     bdm.name=clean; bdm.desigKey=desig; bdm.doj=doj;
-    persist(); renderAll(); showToast('Manager updated.');
+    persist(); renderAll(); showToast('BDM updated.');
   }
 
   function addBdm(form){
     if(!requireEditable()) return;
     const branch=getBranchById(selectedBranchId);
     if(!branch){showToast('Select a branch before adding a BDM.');return;}
-    if(branch.bdms.length>=MAX_BDMS){showToast('Maximum 6 Managers per branch. A 7th Manager is blocked.');return;}
+    if(branch.bdms.length>=MAX_BDMS){showToast('Maximum 6 BDMs per branch. A 7th BDM is blocked.');return;}
     const name=$('bdmNameInput').value.trim();
     const desigKey=$('bdmDesigInput').value;
     const doj=$('bdmDojInput').value;
-    if(!name){showToast('Manager name cannot be blank.');return;}
-    if(bdmNameDuplicate(branch,name)){showToast('Duplicate Manager name under the same branch is not allowed.');return;}
+    if(!name){showToast('BDM name cannot be blank.');return;}
+    if(bdmNameDuplicate(branch,name)){showToast('Duplicate BDM name under the same branch is not allowed.');return;}
     if(!DESIG[desigKey]){showToast('Please choose a valid designation.');return;}
     if(!/^\d{4}-\d{2}-\d{2}$/.test(doj)){showToast('Please select a valid DOJ.');return;}
     branch.bdms.push({id:uid('bdm'),name,desigKey,doj,monthlyData:{}});
     persist(); renderAll();
     $('bdmNameInput').value='';
-    showToast('Manager added successfully.');
+    showToast('BDM added successfully.');
   }
 
   function updateBdmMetric(bdmId,metric,value,monthKey){
     if(!requireEditable()) return;
-    if(!METRICS.includes(metric)) return;
+    if(![...METRICS,'gateDue','gateCollected'].includes(metric)) return;
     const n=Number(value);
     if(!Number.isFinite(n)||n<0){showToast('Please enter a valid non-negative number.');return;}
     const branch=getBranchById(selectedBranchId), bdm=getBdm(branch,bdmId);
     if(!bdm || !monthKey) return;
     const dojMonth=monthKeyForDate(new Date((bdm.doj || currentMonthKey()+'-01')+'T00:00:00'));
-    const nowMonth=currentMonthKey();
-    if(monthKey<dojMonth || monthKey>nowMonth){showToast('Monthly entry is allowed only from Joining Month through Current Month.');return;}
+    if(monthKey<dojMonth){showToast('Cannot enter KPI values before the BDM joining month.');return;}
     bdm.monthlyData[monthKey]=bdm.monthlyData[monthKey] || cloneMetricData();
     bdm.monthlyData[monthKey][metric]=n;
     persist();
     renderBranchDashboard();
+    const refreshed=calculateBDMKpi(bdm,monthKey);
+    const kpiLine=$('adminBdmList').querySelector(`[data-admin-kpi-line="${bdmId}"]`);
+    if(kpiLine){
+      const band=statusBand(refreshed.tillTotal);
+      const gateLabel=refreshed.gateApplicable ? (refreshed.gatePct==null?'Pending':refreshed.gatePct.toFixed(1)+'%') : 'N/A';
+      kpiLine.innerHTML=`<span>BDM KPI Till Date <strong>${refreshed.tillTotal.toFixed(1)}%</strong></span><span>${escapeHtml(band.label)} · Gate ${escapeHtml(gateLabel)}</span>`;
+    }
     updateAdminStatus();
   }
 
@@ -1985,6 +2070,7 @@ computeAll();
   $('renameBranchBtn').addEventListener('click',renameSelectedBranch);
   $('bdmForm').addEventListener('submit',(e)=>{e.preventDefault();addBdm(e.currentTarget)});
   $('adminBranchSelect').addEventListener('change',(e)=>{selectedBranchId=e.target.value;renderAdminBranches();});
+  $('adminInputMonth').addEventListener('change',(e)=>{selectedAdminInputMonth=e.target.value;renderAdminBdmList();});
   $('viewerMonth').addEventListener('change',(e)=>{selectedViewerMonth=e.target.value;renderBranchDashboard();});
   $('lockBtn').addEventListener('click',toggleLock);
   $('adminRefreshBtn').addEventListener('click',refreshAdmin);
