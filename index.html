@@ -432,6 +432,7 @@ body.admin-authenticated .admin-panel-wrap{display:block}
 .admin-bdm-month{
   display:grid;grid-template-columns:repeat(4,1fr);gap:7px
 }
+ .manager-entry-info{min-width:0}.manager-entry-info .counter{line-height:1.35}.monthly-entry-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:10px 0 8px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#F8F5EC}.monthly-entry-head strong{display:block;font-size:10.5px;color:var(--navy)}.monthly-entry-head span{display:block;font-size:9px;color:var(--ink-soft);margin-top:2px}.monthly-entry-range{font:800 9px 'IBM Plex Mono',monospace;color:var(--gold);white-space:nowrap}.manager-month-list{display:grid;gap:8px}.manager-month-card{border:1px solid #E6E0D4;border-radius:11px;background:#fff;padding:9px}.manager-month-card.current-month{border-color:var(--gold);box-shadow:0 3px 12px rgba(200,155,74,.10)}.manager-month-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px;font:800 10px 'IBM Plex Mono',monospace;color:var(--navy)}.manager-month-title b{font-size:8px;background:#E9F6EF;color:#1D7A52;border-radius:999px;padding:3px 6px}.month-kpi-line{display:flex;justify-content:space-between;gap:8px;margin-top:7px;padding-top:6px;border-top:1px dashed var(--line);font-size:9px;color:var(--ink-soft)}.month-kpi-line strong{color:var(--navy);font-family:'IBM Plex Mono',monospace}
 .admin-bdm-month .fieldx label{display:block;font-size:9px;color:var(--ink-soft);font-weight:800;text-transform:uppercase;margin-bottom:3px}
 .admin-bdm-month input,.admin-bdm-month select{width:100%;padding:7px 7px;border:1px solid var(--line);border-radius:8px;background:#fff;
   font:12px 'IBM Plex Mono';color:var(--ink)}
@@ -456,6 +457,7 @@ body.admin-authenticated .admin-panel-wrap{display:block}
   .metric-strip{grid-template-columns:repeat(2,1fr)}
   .bdm-grid{grid-template-columns:1fr}
   .admin-bdm-month{grid-template-columns:1fr 1fr}
+  .monthly-entry-head{align-items:flex-start;flex-direction:column}.monthly-entry-range{white-space:normal}
   .admin-toolbar{grid-template-columns:1fr 1fr}
   .admin-toolbar .wide{grid-column:1 / -1}
   .admin-head{flex-direction:column}
@@ -463,6 +465,7 @@ body.admin-authenticated .admin-panel-wrap{display:block}
 @media (max-width:430px){
   .branch-summary-grid{grid-template-columns:1fr 1fr}
   .admin-bdm-month{grid-template-columns:1fr}
+  .monthly-entry-head{padding:8px}.manager-month-card{padding:8px}
   .admin-row2{grid-template-columns:1fr}
 }
 
@@ -489,7 +492,7 @@ body.admin-authenticated .admin-panel-wrap{display:block}
   <div class="login-box" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
     <div class="login-top">
       <h2 id="adminLoginTitle">Admin Access</h2>
-      <p>Branch, BDM &amp; monthly KPI management</p>
+      <p>Branch, Manager &amp; monthly KPI management</p>
     </div>
     <form class="login-body" id="adminLoginForm" novalidate>
       <div class="login-error" id="loginError" role="alert">Invalid User ID or Password.</div>
@@ -589,7 +592,7 @@ body.admin-authenticated .admin-panel-wrap{display:block}
     <!-- ================= BRANCH / BDM VIEWER ================= -->
     <div class="card branch-view-wrap" id="branchViewerCard">
       <div class="card-head">
-        <h2>Branch &amp; BDM Performance</h2>
+        <h2>Branch &amp; Manager Performance</h2>
         <span class="eyebrow">Live View</span>
       </div>
       <div class="month-selector-row">
@@ -597,11 +600,11 @@ body.admin-authenticated .admin-panel-wrap{display:block}
           <span class="lbl">Viewing Month</span>
           <select id="viewerMonth"></select>
         </label>
-        <div class="inline-note" id="viewerMonthNote">Branch and BDM KPI values are read-only for normal users. Admin changes recalculate this view automatically.</div>
+        <div class="inline-note" id="viewerMonthNote">Branch and Manager KPI values are read-only for normal users. Admin changes recalculate this view automatically.</div>
       </div>
       <div class="branch-summary-grid">
         <div class="summary-tile"><div class="st-label">Total Branches</div><div class="st-value" id="sumBranches">0</div><div class="st-sub">configured</div></div>
-        <div class="summary-tile"><div class="st-label">Total BDMs</div><div class="st-value" id="sumBdms">0</div><div class="st-sub">maximum 6 / branch</div></div>
+        <div class="summary-tile"><div class="st-label">Total Managers</div><div class="st-value" id="sumBdms">0</div><div class="st-sub">maximum 6 / branch</div></div>
         <div class="summary-tile"><div class="st-label">Current Month KPI</div><div class="st-value" id="sumKpi">0.0%</div><div class="st-sub">aggregate score</div></div>
         <div class="summary-tile"><div class="st-label">Upcoming KPI</div><div class="st-value" id="sumUpcoming">0.0%</div><div class="st-sub" id="sumUpcomingMonth">next month</div></div>
         <div class="summary-tile"><div class="st-label">Overall Achievement</div><div class="st-value" id="sumAchievement">₹0</div><div class="st-sub">WRP for selected month</div></div>
@@ -618,7 +621,7 @@ body.admin-authenticated .admin-panel-wrap{display:block}
 
     <div class="card branch-view-wrap">
       <div class="card-head">
-        <h2>BDM Ranking</h2>
+        <h2>Manager Ranking</h2>
         <span class="eyebrow">Highest → Lowest</span>
       </div>
       <div id="bdmRanking" class="ranking-list"></div>
@@ -1184,7 +1187,7 @@ computeAll();
     <div class="admin-head">
       <div>
         <h2>Admin Dashboard</h2>
-        <p>Manage Branch → BDM → monthly KPI inputs without changing the existing KPI formula engine.</p>
+        <p>Manage Branch → Manager → monthly KPI inputs without changing the existing KPI formula engine.</p>
       </div>
       <div class="admin-head-actions">
         <button type="button" class="admin-action secondary" id="adminRefreshBtn">↻ Recalculate</button>
@@ -1195,7 +1198,7 @@ computeAll();
     <div class="admin-body">
       <div class="admin-status">
         <div class="lock-status status-edit" id="configStatusText">Configuration Status: EDIT MODE<small>Admin-only editing is enabled.</small></div>
-        <div class="counter" id="adminSelectedCounter">Select a branch to manage BDMs.</div>
+        <div class="counter" id="adminSelectedCounter">Select a branch to manage Managers.</div>
       </div>
 
       <div class="admin-grid">
@@ -1203,7 +1206,7 @@ computeAll();
           <div class="section-title-row">
             <div>
               <h3>Branch Management</h3>
-              <div class="section-caption">Create and manage multiple branches. Each branch can have up to 6 BDMs.</div>
+              <div class="section-caption">Create and manage multiple branches. Each branch can have up to 6 Managers.</div>
             </div>
             <div class="branch-count-badge" id="adminBranchCount">0 Branches</div>
           </div>
@@ -1216,7 +1219,7 @@ computeAll();
             <div class="admin-note">There is no overall branch limit. Branch names must be unique. Adding a branch automatically selects it for BDM setup.</div>
           </form>
           <div class="branch-list-admin" id="adminBranchList"></div>
-          <div class="selected-branch-strip" id="adminSelectedBranchStrip">Select a branch to manage BDMs.</div>
+          <div class="selected-branch-strip" id="adminSelectedBranchStrip">Select a branch to manage Managers.</div>
           <div class="rename-row">
             <input id="branchRenameInput" type="text" maxlength="80" placeholder="Rename selected branch">
             <button class="admin-action secondary light-btn" type="button" id="renameBranchBtn">Rename Selected</button>
@@ -1224,26 +1227,22 @@ computeAll();
         </div>
 
         <div class="admin-section">
-          <h3>Selected Branch — BDM Management</h3>
+          <h3>Selected Branch — Manager Management</h3>
           <div class="admin-toolbar">
             <div>
               <label for="adminBranchSelect">Selected Branch</label>
               <select id="adminBranchSelect"></select>
             </div>
-            <div>
-              <label for="adminMonthSelect">Editing Month</label>
-              <select id="adminMonthSelect"></select>
-            </div>
-            <div>
-              <label>Status</label>
-              <div class="counter" id="adminMonthStatus">Edit the selected month's achievements.</div>
+            <div class="manager-entry-info">
+              <label>Monthly Data Entry</label>
+              <div class="counter" id="adminMonthStatus">Every Manager will have monthly input fields from their Joining Month through the Current Month.</div>
             </div>
           </div>
           <form class="admin-form" id="bdmForm" novalidate>
             <div class="admin-row2">
               <div>
-                <label for="bdmNameInput">BDM Name</label>
-                <input id="bdmNameInput" type="text" maxlength="80" placeholder="Enter BDM name">
+                <label for="bdmNameInput">Manager Name</label>
+                <input id="bdmNameInput" type="text" maxlength="80" placeholder="Enter Manager name">
               </div>
               <div>
                 <label for="bdmDesigInput">Designation</label>
@@ -1256,11 +1255,11 @@ computeAll();
                 <input id="bdmDojInput" type="date" value="2026-01-09">
               </div>
               <div style="display:flex;align-items:end;">
-                <button class="admin-action primary" type="submit" style="width:100%;">Add BDM</button>
+                <button class="admin-action primary" type="submit" style="width:100%;">Add Manager</button>
               </div>
             </div>
           </form>
-          <div class="counter" id="bdmCounter">BDMs Added: 0 / 6</div>
+          <div class="counter" id="bdmCounter">Managers Added: 0 / 6</div>
           <div class="admin-bdm-list" id="adminBdmList"></div>
           <div class="admin-note">Targets shown here are generated from the existing designation/vintage/seasonality logic. Editable fields are achievements only: WRP, Active Advisor, License Active and BA Confirmation.</div>
         </div>
@@ -1315,7 +1314,6 @@ computeAll();
 
   let adminData = loadAdminData();
   let selectedBranchId = adminData.branches[0]?.id || '';
-  let selectedAdminMonth = currentMonthKey();
   let selectedViewerMonth = currentMonthKey();
   let configLocked = !!adminData.locked;
 
@@ -1565,7 +1563,7 @@ computeAll();
     $('adminBranchCount').textContent=`${adminData.branches.length} Branch${adminData.branches.length===1?'':'es'}`;
     list.innerHTML=adminData.branches.map(b=>`
       <div class="branch-admin-item ${b.id===selectedBranchId?'selected':''}">
-        <div style="min-width:0"><strong><span class="branch-select-dot"></span>${escapeHtml(b.name)}</strong><small>BDMs: ${b.bdms.length}/${MAX_BDMS}</small></div>
+        <div style="min-width:0"><strong><span class="branch-select-dot"></span>${escapeHtml(b.name)}</strong><small>Managers: ${b.bdms.length}/${MAX_BDMS}</small></div>
         <div class="admin-mini-actions"><button type="button" class="mini-btn" data-select-branch="${escapeHtml(b.id)}">Manage</button></div>
       </div>`).join('');
     renderAdminBdmList();
@@ -1588,7 +1586,7 @@ computeAll();
     const selected=getBranchById(selectedBranchId);
     const selectedText=selected
       ? `${selected.name} · ${selected.bdms.length}/${MAX_BDMS} BDMs`
-      : 'Select a branch to manage BDMs.';
+      : 'Select a branch to manage Managers.';
     if($('adminSelectedCounter')) $('adminSelectedCounter').textContent=selectedText;
     if($('adminSelectedBranchStrip')) $('adminSelectedBranchStrip').textContent=selectedText;
   }
@@ -1607,39 +1605,63 @@ computeAll();
     if(!wrap) return;
     if(!branch){
       wrap.innerHTML='<div class="empty-state">Create or select a branch first.</div>';
-      $('bdmCounter').textContent='BDMs Added: 0 / 6';
+      $('bdmCounter').textContent='Managers Added: 0 / 6';
       return;
     }
-    const month=selectedAdminMonth;
-    $('bdmCounter').textContent=`BDMs Added: ${branch.bdms.length} / ${MAX_BDMS}`;
+
+    $('bdmCounter').textContent=`Managers Added: ${branch.bdms.length} / ${MAX_BDMS}`;
     if(!branch.bdms.length){
-      wrap.innerHTML='<div class="empty-state">No BDMs in this branch yet. Add up to 6.</div>';
+      wrap.innerHTML='<div class="empty-state">No Managers in this branch yet. Add up to 6.</div>';
       disableAdminControls();
       return;
     }
-    wrap.innerHTML=branch.bdms.map((bdm,index)=>{
-      const d=bdm.monthlyData?.[month] || cloneMetricData();
-      const kpi=calculateBDMKpi(bdm,month);
-      const t=kpi.targets;
+
+    const currentKey=currentMonthKey();
+    wrap.innerHTML=branch.bdms.map((bdm)=>{
+      const dojDate=new Date((bdm.doj || currentKey+'-01')+'T00:00:00');
+      const joiningMonth=monthKeyForDate(new Date(dojDate.getFullYear(),dojDate.getMonth(),1));
+      const months=[];
+      let cursor=new Date(dojDate.getFullYear(),dojDate.getMonth(),1);
+      const endDate=new Date();
+      const endMonth=new Date(endDate.getFullYear(),endDate.getMonth(),1);
+      while(cursor<=endMonth && months.length<60){
+        months.push(monthKeyForDate(cursor));
+        cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);
+      }
+      const hasMonths=months.length>0;
       return `
       <div class="admin-bdm">
         <div class="admin-bdm-top">
           <div>
-            <div class="admin-bdm-title">BDM — ${escapeHtml(bdm.name)}</div>
-            <div class="admin-bdm-sub">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)} · DOJ ${escapeHtml(bdm.doj)}</div>
+            <div class="admin-bdm-title">Manager — ${escapeHtml(bdm.name)}</div>
+            <div class="admin-bdm-sub">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)} · Joining ${escapeHtml(bdm.doj)} · ${months.length} month${months.length===1?'':'s'} available</div>
           </div>
           <div class="admin-bdm-controls">
             <button type="button" class="mini-btn" data-edit-bdm="${escapeHtml(bdm.id)}">Edit</button>
             <button type="button" class="mini-btn" data-delete-bdm="${escapeHtml(bdm.id)}">Remove</button>
           </div>
         </div>
-        <div class="admin-bdm-month">
-          <div class="fieldx"><label>WRP Achievement</label><input min="0" step="any" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-metric="wrp" value="${d.wrp||0}"><div class="admin-target">Target ${inr(t.wrp)}</div></div>
-          <div class="fieldx"><label>Active Advisors</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-metric="adv" value="${d.adv||0}"><div class="admin-target">Target ${t.adv||0}</div></div>
-          <div class="fieldx"><label>License Active</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-metric="lic" value="${d.lic||0}"><div class="admin-target">Target ${t.lic||0}</div></div>
-          <div class="fieldx"><label>BA Confirmation</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-metric="ba" value="${d.ba||0}"><div class="admin-target">Target ${t.ba||0}</div></div>
+        <div class="monthly-entry-head">
+          <div><strong>Monthly KPI Entry</strong><span>Enter actual values for every month from Joining Month to Current Month.</span></div>
+          <div class="monthly-entry-range">${hasMonths ? monthLabel(months[0])+' → '+monthLabel(months[months.length-1]) : 'No current-month entry window'}</div>
         </div>
-        <div class="admin-note">Selected month KPI: <b>${kpi.total.toFixed(1)}%</b> · ${escapeHtml(statusBand(kpi.total).label)}</div>
+        ${hasMonths ? `<div class="manager-month-list">${months.map((monthKey)=>{
+          const d=bdm.monthlyData?.[monthKey] || cloneMetricData();
+          const kpi=calculateBDMKpi(bdm,monthKey);
+          const t=kpi.targets;
+          const isCurrent=monthKey===currentKey;
+          return `
+          <div class="manager-month-card ${isCurrent?'current-month':''}">
+            <div class="manager-month-title"><span>${monthLabel(monthKey)}</span>${isCurrent?'<b>CURRENT</b>':''}</div>
+            <div class="admin-bdm-month">
+              <div class="fieldx"><label>WRP Achievement</label><input min="0" step="any" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="wrp" value="${d.wrp||0}"><div class="admin-target">Target ${inr(t.wrp)}</div></div>
+              <div class="fieldx"><label>Active Advisors</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="adv" value="${d.adv||0}"><div class="admin-target">Target ${t.adv||0}</div></div>
+              <div class="fieldx"><label>License Active</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="lic" value="${d.lic||0}"><div class="admin-target">Target ${t.lic||0}</div></div>
+              <div class="fieldx"><label>BA Confirmation</label><input min="0" step="1" type="number" data-bdm-id="${escapeHtml(bdm.id)}" data-month="${monthKey}" data-metric="ba" value="${d.ba||0}"><div class="admin-target">Target ${t.ba||0}</div></div>
+            </div>
+            <div class="month-kpi-line"><span>Monthly KPI <strong>${kpi.total.toFixed(1)}%</strong></span><span>${escapeHtml(statusBand(kpi.total).label)}</span></div>
+          </div>`;
+        }).join('')}</div>` : '<div class="empty-state">Joining date is after the current month, so there is no month available for entry yet.</div>'}
       </div>`;
     }).join('');
     disableAdminControls();
@@ -1647,9 +1669,7 @@ computeAll();
 
   function updateViewerMonths(){
     ensureMonthOptions($('viewerMonth'));
-    ensureMonthOptions($('adminMonthSelect'));
     $('viewerMonth').value=selectedViewerMonth;
-    $('adminMonthSelect').value=selectedAdminMonth;
   }
 
   function renderBranchDashboard(){
@@ -1669,8 +1689,8 @@ computeAll();
     $('viewerMonthNote').textContent=`Viewing ${monthLabel(month)} · Upcoming ${monthLabel(next)} · read-only viewer mode.`;
 
     if(!adminData.branches.length){
-      wrap.innerHTML='<div class="empty-state">No Branch/BDM data has been configured yet. An authenticated admin can create the structure.</div>';
-      ranking.innerHTML='<div class="empty-state">BDM ranking will appear after BDMs are added.</div>';
+      wrap.innerHTML='<div class="empty-state">No Branch/Manager data has been configured yet. An authenticated admin can create the structure.</div>';
+      ranking.innerHTML='<div class="empty-state">Manager ranking will appear after Managers are added.</div>';
       return;
     }
 
@@ -1710,7 +1730,7 @@ computeAll();
               return `
               <article class="bdm-card">
                 <div class="bdm-head">
-                  <div><div class="bdm-name">BDM — ${escapeHtml(bdm.name)}</div><div class="bdm-desig">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)}</div></div>
+                  <div><div class="bdm-name">Manager — ${escapeHtml(bdm.name)}</div><div class="bdm-desig">${escapeHtml(DESIG[bdm.desigKey]?.label||bdm.desigKey)}</div></div>
                   <div class="bdm-score">${kpi.total.toFixed(1)}%</div>
                 </div>
                 <div class="bdm-facts">
@@ -1732,9 +1752,9 @@ computeAll();
     ranking.innerHTML=rankingRows.length?rankingRows.map((x,i)=>`
       <div class="rank-row">
         <div class="rank-num">${i+1}</div>
-        <div><div class="rank-name">BDM — ${escapeHtml(x.name)}</div><div class="rank-branch">${escapeHtml(x.branch)}</div></div>
+        <div><div class="rank-name">Manager — ${escapeHtml(x.name)}</div><div class="rank-branch">${escapeHtml(x.branch)}</div></div>
         <div class="rank-kpi">${x.total.toFixed(1)}%</div>
-      </div>`).join(''):'<div class="empty-state">No BDMs available.</div>';
+      </div>`).join(''):'<div class="empty-state">No Managers available.</div>';
   }
 
   function renderGauge(id, value, label){
@@ -1831,7 +1851,7 @@ computeAll();
     persist(); renderAll(); $('branchNameInput').value='';
     $('branchRenameInput').value=branch.name;
     $('bdmNameInput').focus();
-    showToast(`${branch.name} added. Now add up to 6 BDMs.`);
+    showToast(`${branch.name} added. Now add up to 6 Managers.`);
   }
 
   function renameSelectedBranch(){
@@ -1850,19 +1870,19 @@ computeAll();
     if(!branch) return;
     const bdm=getBdm(branch,id);
     if(!bdm) return;
-    if(!confirm(`Remove BDM — ${bdm.name}? This removes only this BDM from the selected branch and deletes its stored monthly data.`)) return;
+    if(!confirm(`Remove Manager — ${bdm.name}? This removes only this BDM from the selected branch and deletes its stored monthly data.`)) return;
     branch.bdms=branch.bdms.filter(x=>x.id!==id);
-    persist(); renderAll(); showToast('BDM removed.');
+    persist(); renderAll(); showToast('Manager removed.');
   }
 
   function editBdm(id){
     if(!requireEditable()) return;
     const branch=getBranchById(selectedBranchId); const bdm=getBdm(branch,id); if(!bdm) return;
-    const name=prompt('BDM Name',bdm.name);
+    const name=prompt('Manager Name',bdm.name);
     if(name===null) return;
     const clean=name.trim();
-    if(!clean){showToast('BDM name cannot be blank.');return;}
-    if(bdmNameDuplicate(branch,clean,bdm.id)){showToast('Duplicate BDM name within this branch is not allowed.');return;}
+    if(!clean){showToast('Manager name cannot be blank.');return;}
+    if(bdmNameDuplicate(branch,clean,bdm.id)){showToast('Duplicate Manager name within this branch is not allowed.');return;}
     const desig=prompt('Designation key ('+Object.keys(DESIG).join(', ')+')',bdm.desigKey);
     if(desig===null) return;
     if(!DESIG[desig]){showToast('Invalid designation. Use one of the existing designation keys.');return;}
@@ -1870,42 +1890,42 @@ computeAll();
     if(doj===null) return;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(doj)){showToast('Invalid DOJ. Use YYYY-MM-DD.');return;}
     bdm.name=clean; bdm.desigKey=desig; bdm.doj=doj;
-    persist(); renderAll(); showToast('BDM updated.');
+    persist(); renderAll(); showToast('Manager updated.');
   }
 
   function addBdm(form){
     if(!requireEditable()) return;
     const branch=getBranchById(selectedBranchId);
     if(!branch){showToast('Select a branch before adding a BDM.');return;}
-    if(branch.bdms.length>=MAX_BDMS){showToast('Maximum 6 BDMs per branch. A 7th BDM is blocked.');return;}
+    if(branch.bdms.length>=MAX_BDMS){showToast('Maximum 6 Managers per branch. A 7th Manager is blocked.');return;}
     const name=$('bdmNameInput').value.trim();
     const desigKey=$('bdmDesigInput').value;
     const doj=$('bdmDojInput').value;
-    if(!name){showToast('BDM name cannot be blank.');return;}
-    if(bdmNameDuplicate(branch,name)){showToast('Duplicate BDM name under the same branch is not allowed.');return;}
+    if(!name){showToast('Manager name cannot be blank.');return;}
+    if(bdmNameDuplicate(branch,name)){showToast('Duplicate Manager name under the same branch is not allowed.');return;}
     if(!DESIG[desigKey]){showToast('Please choose a valid designation.');return;}
     if(!/^\d{4}-\d{2}-\d{2}$/.test(doj)){showToast('Please select a valid DOJ.');return;}
     branch.bdms.push({id:uid('bdm'),name,desigKey,doj,monthlyData:{}});
     persist(); renderAll();
     $('bdmNameInput').value='';
-    showToast('BDM added successfully.');
+    showToast('Manager added successfully.');
   }
 
-  function updateBdmMetric(bdmId,metric,value){
+  function updateBdmMetric(bdmId,metric,value,monthKey){
     if(!requireEditable()) return;
     if(!METRICS.includes(metric)) return;
     const n=Number(value);
     if(!Number.isFinite(n)||n<0){showToast('Please enter a valid non-negative number.');return;}
     const branch=getBranchById(selectedBranchId), bdm=getBdm(branch,bdmId);
-    if(!bdm) return;
-    bdm.monthlyData[ selectedAdminMonth ] = bdm.monthlyData[selectedAdminMonth] || cloneMetricData();
-    bdm.monthlyData[selectedAdminMonth][metric]=n;
+    if(!bdm || !monthKey) return;
+    const dojMonth=monthKeyForDate(new Date((bdm.doj || currentMonthKey()+'-01')+'T00:00:00'));
+    const nowMonth=currentMonthKey();
+    if(monthKey<dojMonth || monthKey>nowMonth){showToast('Monthly entry is allowed only from Joining Month through Current Month.');return;}
+    bdm.monthlyData[monthKey]=bdm.monthlyData[monthKey] || cloneMetricData();
+    bdm.monthlyData[monthKey][metric]=n;
     persist();
     renderBranchDashboard();
     updateAdminStatus();
-    // Keep the edited input in place so multi-digit values can be entered without focus loss.
-    const field=document.querySelector(`#adminBdmList input[data-bdm-id=\"${CSS.escape(bdmId)}\"][data-metric=\"${CSS.escape(metric)}\"]`);
-    if(field && document.activeElement!==field) field.value=String(n);
   }
 
   function toggleLock(){
@@ -1965,7 +1985,6 @@ computeAll();
   $('renameBranchBtn').addEventListener('click',renameSelectedBranch);
   $('bdmForm').addEventListener('submit',(e)=>{e.preventDefault();addBdm(e.currentTarget)});
   $('adminBranchSelect').addEventListener('change',(e)=>{selectedBranchId=e.target.value;renderAdminBranches();});
-  $('adminMonthSelect').addEventListener('change',(e)=>{selectedAdminMonth=e.target.value;renderAdminBdmList();});
   $('viewerMonth').addEventListener('change',(e)=>{selectedViewerMonth=e.target.value;renderBranchDashboard();});
   $('lockBtn').addEventListener('click',toggleLock);
   $('adminRefreshBtn').addEventListener('click',refreshAdmin);
@@ -1983,9 +2002,9 @@ computeAll();
   });
 
   $('adminBdmList').addEventListener('input',(e)=>{
-    const id=e.target.dataset.bdmId, metric=e.target.dataset.metric;
-    if(!id||!metric)return;
-    updateBdmMetric(id,metric,e.target.value);
+    const id=e.target.dataset.bdmId, metric=e.target.dataset.metric, month=e.target.dataset.month;
+    if(!id||!metric||!month)return;
+    updateBdmMetric(id,metric,e.target.value,month);
   });
 
   /* Gate criteria storage is kept per month/BDM and surfaced through the
