@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>BDM Promotion Dial · KPI Calculator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy:#0F2438;
@@ -35,7 +33,7 @@
     -webkit-font-smoothing:antialiased;
     padding-bottom:48px;
   }
-  .wrap{max-width:520px;margin:0 auto;}
+  .wrap{max-width:1400px;margin:0 auto;}
   h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
   .mono{font-family:'IBM Plex Mono',monospace;}
 
@@ -249,8 +247,18 @@
   .footer-note{text-align:center;font-size:10.5px;color:#A9A08B;padding:10px 20px 4px;line-height:1.6;}
 
   ::selection{background:var(--gold-light);}
-  @media (min-width:540px){
-    .wrap{max-width:560px;}
+  @media (min-width:540px) and (max-width:899px){
+    .wrap{max-width:760px;}
+    .content{padding-left:20px;padding-right:20px;}
+  }
+  @media (min-width:900px){
+    .wrap{max-width:1400px;}
+    .dash{border-radius:0;}
+    .content{max-width:1400px;margin:0 auto;padding:20px 28px 0;}
+    .branch-view-wrap{max-width:none!important;}
+    .branch-view-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .admin-panel-wrap{margin:0 28px 14px;}
+    .admin-grid{grid-template-columns:minmax(300px,.85fr) minmax(0,1.75fr);}
   }
 
 /* ================= ADMIN + BRANCH/BDM MANAGEMENT ================= */
@@ -274,7 +282,7 @@
 .summary-tile .st-label{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-soft);font-weight:700}
 .summary-tile .st-value{font-family:'IBM Plex Mono';font-size:20px;font-weight:700;color:var(--navy);margin-top:5px}
 .summary-tile .st-sub{font-size:10px;color:var(--ink-soft);margin-top:3px}
-.month-selector-row{display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:12px;align-items:end}
+.month-selector-row{display:grid;grid-template-columns:minmax(180px,280px) minmax(0,1fr);gap:12px;align-items:end}
 .field.compact{margin:0}
 .month-selector-row select,.admin-form select,.admin-form input,.admin-toolbar select,.admin-toolbar input{
   width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:10px;
@@ -393,15 +401,23 @@ body.admin-authenticated .admin-panel-wrap{display:block}
 .admin-form label{font-size:10px;color:var(--ink-soft);font-weight:800;text-transform:uppercase}
 .admin-form .hint{font-size:9.5px;color:var(--ink-soft);line-height:1.35;margin-top:-4px}
 .admin-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.branch-list-admin{display:flex;flex-direction:column;gap:7px;margin-top:10px}
-.branch-admin-item{
-  display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;padding:8px 9px;border:1px solid var(--line);
-  border-radius:10px;background:#FCFAF5
-}
-.branch-admin-item strong{font-size:11.5px}
-.branch-admin-item small{display:block;color:var(--ink-soft);font-size:9.5px;margin-top:2px}
-.admin-mini-actions{display:flex;gap:5px}
-.mini-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 7px;font-size:9px;font-weight:800;cursor:pointer}
+  .section-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .section-caption{font-size:10px;color:var(--ink-soft);line-height:1.35;margin-top:-6px}
+  .branch-count-badge{flex:none;padding:6px 9px;border-radius:999px;background:var(--navy);color:#fff;font:800 9px 'IBM Plex Mono',monospace;white-space:nowrap}
+  .branch-create-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .branch-create-row .admin-action{min-width:116px}
+  .branch-list-admin{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .branch-admin-item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:#FCFAF5;transition:.18s ease;min-width:0}
+  .branch-admin-item.selected{border-color:var(--gold);background:#FFF9EA;box-shadow:0 4px 14px rgba(200,155,74,.12)}
+  .branch-admin-item strong{font-size:11.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .branch-admin-item small{display:block;color:var(--ink-soft);font-size:9.5px;margin-top:3px}
+  .branch-admin-item .branch-select-dot{width:7px;height:7px;border-radius:50%;background:#B8B0A0;display:inline-block;margin-right:5px}
+  .branch-admin-item.selected .branch-select-dot{background:var(--gold)}
+  .admin-mini-actions{display:flex;gap:5px;flex:none}
+  .mini-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:800;cursor:pointer;white-space:nowrap}
+  .selected-branch-strip{margin-top:10px;padding:8px 10px;border-radius:10px;background:#F6F2E7;color:var(--navy);font:800 10px 'IBM Plex Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rename-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin-top:7px}
+  .light-btn{color:var(--navy-2)!important;background:#fff!important}
 .admin-toolbar{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:10px}
 .admin-toolbar label{display:block;font-size:9.5px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;margin-bottom:4px}
 .counter{font-family:'IBM Plex Mono';font-size:10px;color:var(--ink-soft);margin-top:6px}
@@ -450,6 +466,20 @@ body.admin-authenticated .admin-panel-wrap{display:block}
   .admin-row2{grid-template-columns:1fr}
 }
 
+
+@media (max-width:1100px){.branch-view-wrap,.admin-panel-wrap{max-width:none!important}}
+@media (max-width:760px){
+  .branch-list-admin{grid-template-columns:1fr}
+  .branch-create-row,.rename-row{grid-template-columns:1fr}
+  .branch-create-row .admin-action,.rename-row .admin-action{width:100%}
+  .admin-toolbar{grid-template-columns:1fr}
+  .admin-toolbar .wide{grid-column:auto}
+}
+@media (max-width:520px){
+  .content{padding-left:10px;padding-right:10px}.admin-panel-wrap{padding:0 10px}.admin-body{padding:10px}.admin-section{padding:11px}.admin-head{padding:13px}
+  .admin-head-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}.admin-head-actions .admin-action{width:100%}.admin-head-actions #adminLogoutBtn{grid-column:1/-1}
+  .branch-summary-grid{gap:7px}.summary-tile{padding:10px 9px}.summary-tile .st-value{font-size:17px}.branch-card-head{padding:12px}.branch-card-body{padding:11px}.bdm-card{padding:10px}.admin-bdm{padding:9px}.admin-bdm-top{flex-direction:column}.admin-bdm-controls{width:100%}.admin-bdm-controls .mini-btn{flex:1}
+}
 </style>
 </head>
 <body>
@@ -1169,18 +1199,28 @@ computeAll();
       </div>
 
       <div class="admin-grid">
-        <div class="admin-section">
-          <h3>Branch Management</h3>
-          <form class="admin-form" id="branchForm" novalidate>
-            <label for="branchNameInput">Branch Name</label>
-            <input id="branchNameInput" type="text" maxlength="80" placeholder="e.g. Rajendra Place">
-            <div class="admin-row2">
-              <button class="admin-action primary" type="submit">Add Branch</button>
-              <button class="admin-action secondary" type="button" id="renameBranchBtn">Rename Selected</button>
+        <div class="admin-section branch-management-section">
+          <div class="section-title-row">
+            <div>
+              <h3>Branch Management</h3>
+              <div class="section-caption">Create and manage multiple branches. Each branch can have up to 6 BDMs.</div>
             </div>
-            <div class="admin-note">Branch names must be unique. Existing BDM records remain attached when a branch is renamed.</div>
+            <div class="branch-count-badge" id="adminBranchCount">0 Branches</div>
+          </div>
+          <form class="admin-form" id="branchForm" novalidate>
+            <label for="branchNameInput">New Branch Name</label>
+            <div class="branch-create-row">
+              <input id="branchNameInput" type="text" maxlength="80" placeholder="e.g. Rajendra Place" autocomplete="off">
+              <button class="admin-action primary" type="submit">＋ Add Branch</button>
+            </div>
+            <div class="admin-note">There is no overall branch limit. Branch names must be unique. Adding a branch automatically selects it for BDM setup.</div>
           </form>
           <div class="branch-list-admin" id="adminBranchList"></div>
+          <div class="selected-branch-strip" id="adminSelectedBranchStrip">Select a branch to manage BDMs.</div>
+          <div class="rename-row">
+            <input id="branchRenameInput" type="text" maxlength="80" placeholder="Rename selected branch">
+            <button class="admin-action secondary light-btn" type="button" id="renameBranchBtn">Rename Selected</button>
+          </div>
         </div>
 
         <div class="admin-section">
@@ -1249,6 +1289,30 @@ computeAll();
   const metricLabels = {wrp:'WRP', adv:'Active Advisor', lic:'License Active', ba:'BA Confirmation'};
   const metricWeights = {wrp:W_WRP, adv:W_ADV, lic:W_LIC, ba:W_BA};
 
+  /* Safe storage wrappers: support normal hosted pages, file/preview contexts,
+     and private browser modes where Web Storage is unavailable. */
+  const memoryStore = {local:Object.create(null),session:Object.create(null)};
+  function getStore(kind){
+    const fallback=memoryStore[kind];
+    const storage=kind==='local'?window.localStorage:window.sessionStorage;
+    return storage;
+  }
+  function storageGet(kind,key){
+    try{ const s=getStore(kind); return s ? s.getItem(key) : fallbackGet(kind,key); }
+    catch(err){ return memoryStore[kind][key] ?? null; }
+  }
+  function storageSet(kind,key,value){
+    try{ const s=getStore(kind); if(s){s.setItem(key,value); return true;} }
+    catch(err){}
+    memoryStore[kind][key]=String(value); return true;
+  }
+  function storageRemove(kind,key){
+    try{ const s=getStore(kind); if(s){s.removeItem(key); return true;} }
+    catch(err){}
+    delete memoryStore[kind][key]; return true;
+  }
+  function fallbackGet(kind,key){ return memoryStore[kind][key] ?? null; }
+
   let adminData = loadAdminData();
   let selectedBranchId = adminData.branches[0]?.id || '';
   let selectedAdminMonth = currentMonthKey();
@@ -1312,7 +1376,7 @@ computeAll();
 
   function loadAdminData(){
     try{
-      const raw=localStorage.getItem(STORAGE_KEY);
+      const raw=storageGet('local',STORAGE_KEY);
       if(!raw) return defaultAdminData();
       return sanitizeLoaded(JSON.parse(raw));
     }catch(err){
@@ -1324,7 +1388,7 @@ computeAll();
   function persist(){
     try{
       adminData.locked=configLocked;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(adminData));
+      storageSet('local',STORAGE_KEY, JSON.stringify(adminData));
       return true;
     }catch(err){
       showToast('Storage error: the browser could not save the latest change.');
@@ -1482,9 +1546,11 @@ computeAll();
     const list=$('adminBranchList'), sel=$('adminBranchSelect');
     if(!list||!sel) return;
     if(!adminData.branches.length){
-      list.innerHTML='<div class="empty-state">No branches configured yet.</div>';
+      $('adminBranchCount').textContent='0 Branches';
+      list.innerHTML='<div class="empty-state">No branches configured yet. Add your first branch above.</div>';
       sel.innerHTML='<option value="">No branches available</option>';
       selectedBranchId='';
+      if($('branchRenameInput')) $('branchRenameInput').value='';
       renderAdminBdmList();
       updateAdminStatus();
       return;
@@ -1494,12 +1560,13 @@ computeAll();
 
     sel.innerHTML=adminData.branches.map(b=>`<option value="${escapeHtml(b.id)}">${escapeHtml(b.name)}</option>`).join('');
     sel.value=selectedBranchId;
+    const selected=getBranchById(selectedBranchId);
+    if($('branchRenameInput')) $('branchRenameInput').value=selected?.name||'';
+    $('adminBranchCount').textContent=`${adminData.branches.length} Branch${adminData.branches.length===1?'':'es'}`;
     list.innerHTML=adminData.branches.map(b=>`
-      <div class="branch-admin-item">
-        <div><strong>${escapeHtml(b.name)}</strong><small>BDMs: ${b.bdms.length}/${MAX_BDMS}</small></div>
-        <div class="admin-mini-actions">
-          <button type="button" class="mini-btn" data-select-branch="${escapeHtml(b.id)}">Select</button>
-        </div>
+      <div class="branch-admin-item ${b.id===selectedBranchId?'selected':''}">
+        <div style="min-width:0"><strong><span class="branch-select-dot"></span>${escapeHtml(b.name)}</strong><small>BDMs: ${b.bdms.length}/${MAX_BDMS}</small></div>
+        <div class="admin-mini-actions"><button type="button" class="mini-btn" data-select-branch="${escapeHtml(b.id)}">Manage</button></div>
       </div>`).join('');
     renderAdminBdmList();
     updateAdminStatus();
@@ -1519,9 +1586,11 @@ computeAll();
       btn.className='admin-action '+(configLocked?'secondary':'primary');
     }
     const selected=getBranchById(selectedBranchId);
-    $('adminSelectedCounter').textContent=selected
+    const selectedText=selected
       ? `${selected.name} · ${selected.bdms.length}/${MAX_BDMS} BDMs`
       : 'Select a branch to manage BDMs.';
+    if($('adminSelectedCounter')) $('adminSelectedCounter').textContent=selectedText;
+    if($('adminSelectedBranchStrip')) $('adminSelectedBranchStrip').textContent=selectedText;
   }
 
   function disableAdminControls(){
@@ -1684,6 +1753,7 @@ computeAll();
   }
 
   function renderAll(){
+    renderAdminDesignationOptions();
     updateViewerMonths();
     renderAdminBranches();
     renderBranchDashboard();
@@ -1704,12 +1774,12 @@ computeAll();
 
   function setAdminAuthenticated(authenticated){
     if(authenticated){
-      sessionStorage.setItem(SESSION_KEY,'1');
+      storageSet('session',SESSION_KEY,'1');
       document.body.classList.add('admin-authenticated');
       closeAdminModal();
       renderAll();
     }else{
-      sessionStorage.removeItem(SESSION_KEY);
+      storageRemove('session',SESSION_KEY);
       document.body.classList.remove('admin-authenticated');
       renderAll();
     }
@@ -1759,17 +1829,19 @@ computeAll();
     adminData.branches.push(branch);
     selectedBranchId=branch.id;
     persist(); renderAll(); $('branchNameInput').value='';
-    showToast('Branch added successfully.');
+    $('branchRenameInput').value=branch.name;
+    $('bdmNameInput').focus();
+    showToast(`${branch.name} added. Now add up to 6 BDMs.`);
   }
 
   function renameSelectedBranch(){
     if(!requireEditable()) return;
     const branch=getBranchById(selectedBranchId);
-    const clean=$('branchNameInput').value.trim();
+    const clean=$('branchRenameInput').value.trim();
     if(!branch){showToast('Select a branch first.');return;}
     if(!clean){showToast('Branch name cannot be blank.');return;}
     if(branchNameDuplicate(clean,branch.id)){showToast('That branch name already exists.');return;}
-    branch.name=clean; persist(); renderAll(); $('branchNameInput').value=''; showToast('Branch name updated.');
+    branch.name=clean; persist(); renderAll(); $('branchRenameInput').value=''; showToast('Branch name updated.');
   }
 
   function removeBdm(id){
@@ -1829,9 +1901,11 @@ computeAll();
     bdm.monthlyData[ selectedAdminMonth ] = bdm.monthlyData[selectedAdminMonth] || cloneMetricData();
     bdm.monthlyData[selectedAdminMonth][metric]=n;
     persist();
-    renderAdminBdmList();
     renderBranchDashboard();
     updateAdminStatus();
+    // Keep the edited input in place so multi-digit values can be entered without focus loss.
+    const field=document.querySelector(`#adminBdmList input[data-bdm-id=\"${CSS.escape(bdmId)}\"][data-metric=\"${CSS.escape(metric)}\"]`);
+    if(field && document.activeElement!==field) field.value=String(n);
   }
 
   function toggleLock(){
@@ -1890,7 +1964,7 @@ computeAll();
   $('branchForm').addEventListener('submit',(e)=>{e.preventDefault();addBranch($('branchNameInput').value)});
   $('renameBranchBtn').addEventListener('click',renameSelectedBranch);
   $('bdmForm').addEventListener('submit',(e)=>{e.preventDefault();addBdm(e.currentTarget)});
-  $('adminBranchSelect').addEventListener('change',(e)=>{selectedBranchId=e.target.value;renderAdminBdmList();updateAdminStatus();});
+  $('adminBranchSelect').addEventListener('change',(e)=>{selectedBranchId=e.target.value;renderAdminBranches();});
   $('adminMonthSelect').addEventListener('change',(e)=>{selectedAdminMonth=e.target.value;renderAdminBdmList();});
   $('viewerMonth').addEventListener('change',(e)=>{selectedViewerMonth=e.target.value;renderBranchDashboard();});
   $('lockBtn').addEventListener('click',toggleLock);
@@ -1930,7 +2004,7 @@ computeAll();
     unlock:()=>{ if(document.body.classList.contains('admin-authenticated')){configLocked=false;persist();renderAll();} }
   };
 
-  if(sessionStorage.getItem(SESSION_KEY)==='1'){
+  if(storageGet('session',SESSION_KEY)==='1'){
     document.body.classList.add('admin-authenticated');
   }
 
