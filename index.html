@@ -66,7 +66,16 @@
     font-weight:600;
     white-space:nowrap;
   }
-  .dash-top-right{display:flex;align-items:center;gap:8px;flex:none;}
+  .dash-top-right{display:flex;align-items:center;gap:8px;flex:none;flex-wrap:wrap;justify-content:flex-end;}
+  .top-info-chip{
+    display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;
+    background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:#fff;
+    min-width:78px;justify-content:center;white-space:nowrap;
+  }
+  .top-info-value{font:800 12px 'IBM Plex Mono',monospace;line-height:1;}
+  .top-info-label{font-size:8px;text-transform:uppercase;letter-spacing:.35px;color:#C9D8E5;font-weight:800;}
+  .designation-chip{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
   .reset-btn{
     display:flex;align-items:center;gap:4px;
     background:rgba(255,255,255,.1);
@@ -288,7 +297,7 @@
   .viewer-meter{
     display:flex;align-items:center;gap:7px;padding:5px 9px;border-radius:999px;
     background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:#fff;
-    min-width:92px;justify-content:center;
+    min-width:92px;justify-content:center;white-space:nowrap;
   }
   .viewer-dot{width:7px;height:7px;border-radius:50%;background:#70D39A;box-shadow:0 0 0 4px rgba(112,211,154,.12);animation:viewPulse 1.8s infinite;}
   .viewer-count{font:800 12px 'IBM Plex Mono',monospace;line-height:1;}
@@ -352,8 +361,20 @@
   .empty-admin{padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--ink-soft);font-size:10px;text-align:center;}
   @media (max-width:760px){
     .admin-grid{grid-template-columns:1fr;}
+    .dash-top{align-items:flex-start;}
+    .dash-top-right{max-width:62%;gap:5px;}
+    .viewer-meter,.top-info-chip,.vintage-chip,.admin-entry-btn{min-width:0;}
+    .designation-chip{max-width:150px;}
   }
   @media (max-width:520px){
+    .dash{padding:10px 10px 12px;}
+    .dash-top{gap:7px;}
+    .brand-text .t1{font-size:13px;}
+    .brand-text .t2{font-size:8.5px;}
+    .dash-top-right{max-width:64%;gap:4px;}
+    .viewer-meter,.top-info-chip{padding:5px 7px;}
+    .viewer-label,.top-info-label{font-size:7px;}
+    .designation-chip{max-width:125px;}
     .selector-strip{grid-template-columns:1fr;}
     .admin-row2{grid-template-columns:1fr;}
     .admin-box-head{flex-direction:column;}
@@ -463,8 +484,13 @@
           <span class="viewer-count" id="viewerCount">1</span>
           <span class="viewer-label">Active</span>
         </div>
+        <div class="top-info-chip" title="Total times this page has been opened in this browser/origin">
+          <span class="top-info-value" id="pageOpenCount">0</span>
+          <span class="top-info-label">Opens</span>
+        </div>
         <button type="button" class="admin-entry-btn" id="adminOpenBtn">Admin</button>
         <button type="button" class="reset-btn" id="resetBtn" title="Reset all entered KPI data">⟲ Reset</button>
+        <div class="vintage-chip designation-chip" id="chipDesignation" title="Selected designation">Designation →</div>
         <div class="vintage-chip" id="chipVintage">Set DOJ →</div>
       </div>
     </div>
@@ -791,7 +817,8 @@ function buildMonthCards(){
   const doj=new Date(dojVal+'T00:00:00'); const asof=new Date(asofVal+'T00:00:00');
   $('doj')._d=doj;
   const vi=vintageIndex(doj,asof);
-  $('chipVintage').textContent = vi<0 ? 'DOJ is in the future' : ('M'+Math.max(vi,0)+' · '+DESIG[desigSel.value].label);
+  $('chipDesignation').textContent = 'Designation: '+(DESIG[desigSel.value]?.label||'—');
+  $('chipVintage').textContent = vi<0 ? 'DOJ is in the future' : ('M'+Math.max(vi,0)+' · Vintage');
   if(vi<0){ list.innerHTML='<div class="card-sub">The calculation date is before the joining date.</div>'; renderVintageTrack(-1); return; }
 
   const mar27=new Date(2027,2,1);
@@ -988,7 +1015,8 @@ function computeAll(){
   $('bmAdv').textContent=advPct.toFixed(0)+'%';
   $('bmLic').textContent=licPct.toFixed(0)+'%';
   $('bmBa').textContent=baPct.toFixed(0)+'%';
-  $('chipVintage').textContent='M'+vi+' · '+cfg.label;
+  $('chipDesignation').textContent='Designation: '+cfg.label;
+  $('chipVintage').textContent='M'+vi+' · Vintage';
 
   const dialPct2=Math.min(tillTotal,100);
   $('gaugeFill2').setAttribute('stroke-dasharray',dialPct2+' 100');
@@ -1098,6 +1126,18 @@ function resetAll(){
   buildMonthCards();  // rebuilds every month card with monthState defaulting to {wrp:0,adv:0,lic:0,ba:0}
   computeAll();       // recompute gauges, scorecard, gate, verdict with all-zero inputs
 }
+
+/* ---------- page open counter ----------
+   Persistent per browser/origin counter. A truly global counter requires a backend/database. */
+const PAGE_OPEN_KEY='promotionDialPageOpenCount_v1';
+function incrementPageOpenCount(){
+  try{
+    const next=Math.max(0,Number(localStorage.getItem(PAGE_OPEN_KEY)||0))+1;
+    localStorage.setItem(PAGE_OPEN_KEY,String(next));
+    const node=$('pageOpenCount'); if(node) node.textContent=next;
+  }catch(err){ const node=$('pageOpenCount'); if(node) node.textContent='—'; }
+}
+incrementPageOpenCount();
 
 /* ---------- lightweight active viewer meter ----------
    Static HTML cannot count global visitors without a backend. This shows active sessions
