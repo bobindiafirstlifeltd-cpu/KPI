@@ -422,7 +422,7 @@
         <div class="admin-grid">
           <section class="admin-card">
             <h3>1. Branch</h3>
-            <p>Add a branch, then select it before adding BDMs.</p>
+            <p>Add a branch, then select it before adding BDMs. You can also permanently delete a branch and all BDM data from the list below.</p>
             <form class="admin-form" id="branchForm" novalidate>
               <label for="branchNameInput">Branch Name</label>
               <input id="branchNameInput" maxlength="80" placeholder="e.g. Rajendra Place">
@@ -1479,6 +1479,27 @@ computeAll();
     $('bdmNameInput').value=''; showToast('BDM added.');
   }
 
+  function removeBranch(id){
+    if(!requireAdmin()) return;
+    const branch=getBranch(id); if(!branch) return;
+    const count=branch.bdms.length;
+    const warning=count
+      ? `Delete Branch — ${branch.name}? This will permanently remove the branch and all ${count} BDM(s) with their stored monthly KPI data. This cannot be undone.`
+      : `Delete Branch — ${branch.name}? This cannot be undone.`;
+    if(!confirm(warning)) return;
+    data.branches=data.branches.filter(b=>b.id!==id);
+    const next=data.branches[0]||null;
+    selectedBranchId=next?.id||'';
+    selectedBdmId=next?.bdms[0]?.id||'';
+    persist();
+    renderSelectors();
+    renderAdminViews();
+    const nextBdm=getSelectedBdm();
+    if(nextBdm) applyManagerToCalculator(nextBdm); else clearCalculatorSelection();
+    applyCalculatorAccess();
+    showToast(`Branch ${branch.name} deleted.`);
+  }
+
   function removeBdm(id){
     if(!requireAdmin()) return;
     const branch=getBranch(selectedBranchId), bdm=branch?.bdms.find(b=>b.id===id); if(!bdm) return;
@@ -1514,7 +1535,7 @@ computeAll();
       <div class="branch-item ${b.id===selectedBranchId?'active':''}">
         <div class="branch-item-top">
           <div><strong>${escapeHtml(b.name)}</strong><small>${b.bdms.length} / ${MAX_BDMS} BDMs</small></div>
-          <div class="mini-actions"><button type="button" class="mini-btn" data-admin-branch="${escapeHtml(b.id)}">Select</button></div>
+          <div class="mini-actions"><button type="button" class="mini-btn" data-admin-branch="${escapeHtml(b.id)}">Select</button><button type="button" class="mini-btn" data-remove-branch="${escapeHtml(b.id)}">Delete Branch</button></div>
         </div>
       </div>`).join(''):'<div class="empty-admin">No branches yet.</div>';
     const branch=getBranch(selectedBranchId);
@@ -1552,7 +1573,7 @@ computeAll();
   $('bdmForm').addEventListener('submit',e=>{e.preventDefault();addBdm();});
   $('branchSelector').addEventListener('change',e=>selectManager(e.target.value,getBranch(e.target.value)?.bdms[0]?.id||''));
   $('bdmSelector').addEventListener('change',e=>selectManager(selectedBranchId,e.target.value));
-  $('branchList').addEventListener('click',e=>{const id=e.target.dataset.adminBranch;if(id)selectAdminBranch(id);});
+  $('branchList').addEventListener('click',e=>{const id=e.target.dataset.adminBranch, rem=e.target.dataset.removeBranch;if(id)selectAdminBranch(id); if(rem)removeBranch(rem);});
   $('bdmList').addEventListener('click',e=>{
     const use=e.target.dataset.selectBdm, edit=e.target.dataset.editBdm, rem=e.target.dataset.removeBdm;
     if(use){selectedBdmId=use;renderSelectors();const bdm=getSelectedBdm();if(bdm)applyManagerToCalculator(bdm);applyCalculatorAccess();}
