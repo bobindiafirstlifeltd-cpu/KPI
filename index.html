@@ -285,6 +285,19 @@
   }
   .admin-entry-btn:hover{filter:brightness(1.03);transform:translateY(-1px);}
   .admin-entry-btn:focus-visible,.admin-action:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px;}
+  .viewer-meter{
+    display:flex;align-items:center;gap:7px;padding:5px 9px;border-radius:999px;
+    background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:#fff;
+    min-width:92px;justify-content:center;
+  }
+  .viewer-dot{width:7px;height:7px;border-radius:50%;background:#70D39A;box-shadow:0 0 0 4px rgba(112,211,154,.12);animation:viewPulse 1.8s infinite;}
+  .viewer-count{font:800 12px 'IBM Plex Mono',monospace;line-height:1;}
+  .viewer-label{font-size:8px;text-transform:uppercase;letter-spacing:.35px;color:#C9D8E5;font-weight:800;}
+  @keyframes viewPulse{50%{transform:scale(1.2);opacity:.65;}}
+  .report-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+  .report-actions .share-btn{margin:0;}
+  .download-btn{border:none;border-radius:999px;padding:9px 13px;background:#fff;color:var(--navy);font:800 10px 'Inter',sans-serif;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);}
+  .download-btn:hover{transform:translateY(-1px);}
   .reset-btn{display:none;}
   body.admin-mode .reset-btn{display:flex;}
   .readonly-note{font-size:10.5px;color:var(--ink-soft);line-height:1.45;margin-top:7px;}
@@ -445,6 +458,11 @@
         </div>
       </div>
       <div class="dash-top-right">
+        <div class="viewer-meter" title="Active viewer estimate for this browser/origin">
+          <span class="viewer-dot" aria-hidden="true"></span>
+          <span class="viewer-count" id="viewerCount">1</span>
+          <span class="viewer-label">Active</span>
+        </div>
         <button type="button" class="admin-entry-btn" id="adminOpenBtn">Admin</button>
         <button type="button" class="reset-btn" id="resetBtn" title="Reset all entered KPI data">⟲ Reset</button>
         <div class="vintage-chip" id="chipVintage">Set DOJ →</div>
@@ -626,7 +644,10 @@
       <div class="vlabel" id="verdictLabel">Not Qualified for Promotion</div>
       <div class="vsub" id="verdictSub">Score below 100% and/or gate criteria not met</div>
       <div class="vscore" id="verdictScore">Composite Score: 0.00%</div>
-      <button type="button" class="share-btn" id="shareBtn">📲 Share Report on WhatsApp</button>
+      <div class="report-actions">
+        <button type="button" class="download-btn" id="downloadReportBtn">⬇ Download Report</button>
+        <button type="button" class="share-btn" id="shareBtn">📲 Share Report on WhatsApp</button>
+      </div>
     </div>
 
     <!-- ================= ASSUMPTIONS ================= -->
@@ -850,6 +871,7 @@ function buildMonthCards(){
       computeAll();
     });
   });
+  if(typeof applyCalculatorAccess==='function') applyCalculatorAccess();
   renderVintageTrack(vi);
 }
 
@@ -1022,8 +1044,13 @@ function buildReportText(){
   const gateLine = !r.gateApplicable ? 'Not yet applicable (from M13)'
     : r.gatePct==null ? 'Pending — enter Due/Collected'
     : (r.gatePass?'Passed':'Failed')+' — '+r.gatePct.toFixed(1)+'% (target 80%)';
+  const selectedBranch = typeof getBranch==='function' ? getBranch(selectedBranchId) : null;
+  const selectedBdm = typeof getSelectedBdm==='function' ? getSelectedBdm() : null;
   return [
-    '*BDM KPI Report — '+r.desig+'*',
+    '*BDM KPI Report*',
+    selectedBranch ? 'Branch: '+selectedBranch.name : '',
+    selectedBdm ? 'BDM: '+selectedBdm.name : '',
+    'Designation: '+r.desig,
     'Vintage: M'+r.vintage+'  ·  As of: '+r.asOf,
     '',
     '*WRP*: '+inr(r.wrp.ach)+' / '+inr(r.wrp.tgt)+' ('+r.wrp.pct.toFixed(0)+'%) — Score '+r.wrp.score.toFixed(2)+'%',
@@ -1036,7 +1063,19 @@ function buildReportText(){
     '*Gate (13th M Persistency)*: '+gateLine,
     '',
     '*Verdict*: '+(r.qualified?'Qualified for Promotion ✅':'Not Qualified for Promotion ⏳')
-  ].join('\n');
+  ].filter(Boolean).join('\n');
+}
+
+function downloadReport(){
+  const text=buildReportText();
+  const branch=typeof getBranch==='function'?getBranch(selectedBranchId):null;
+  const bdm=typeof getSelectedBdm==='function'?getSelectedBdm():null;
+  const safe=(branch?.name||'Branch')+'-'+(bdm?.name||'BDM');
+  const fileName=('KPI-Report-'+safe).replace(/[^a-z0-9-_ ]/gi,'').replace(/\s+/g,'-')+'.txt';
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),500);
 }
 
 function shareOnWhatsApp(){
@@ -1060,12 +1099,38 @@ function resetAll(){
   computeAll();       // recompute gauges, scorecard, gate, verdict with all-zero inputs
 }
 
+/* ---------- lightweight active viewer meter ----------
+   Static HTML cannot count global visitors without a backend. This shows active sessions
+   sharing this browser/origin using localStorage heartbeats. */
+const VIEWER_KEY='promotionDialActiveViewers_v1';
+const VIEWER_TTL=30000;
+const viewerSessionId='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);
+function refreshViewerMeter(){
+  try{
+    const now=Date.now();
+    const raw=JSON.parse(localStorage.getItem(VIEWER_KEY)||'{}');
+    Object.keys(raw).forEach(id=>{ if(!raw[id] || now-raw[id]>VIEWER_TTL) delete raw[id]; });
+    raw[viewerSessionId]=now;
+    localStorage.setItem(VIEWER_KEY,JSON.stringify(raw));
+    const count=Object.keys(raw).length;
+    const node=$('viewerCount'); if(node) node.textContent=count;
+  }catch(err){ const node=$('viewerCount'); if(node) node.textContent='1'; }
+}
+function leaveViewerMeter(){
+  try{ const raw=JSON.parse(localStorage.getItem(VIEWER_KEY)||'{}'); delete raw[viewerSessionId]; localStorage.setItem(VIEWER_KEY,JSON.stringify(raw)); }catch(err){}
+}
+refreshViewerMeter();
+setInterval(refreshViewerMeter,10000);
+window.addEventListener('storage',e=>{if(e.key===VIEWER_KEY) refreshViewerMeter();});
+window.addEventListener('beforeunload',leaveViewerMeter);
+
 /* ---------- events ---------- */
 ['doj','asof'].forEach(id=>$(id).addEventListener('change',()=>{ monthState={}; buildMonthCards(); computeAll(); }));
 desigSel.addEventListener('change',()=>{ buildMonthCards(); computeAll(); });
 $('gateDue').addEventListener('input',computeAll);
 $('gateCollected').addEventListener('input',computeAll);
 $('shareBtn').addEventListener('click',shareOnWhatsApp);
+$('downloadReportBtn').addEventListener('click',downloadReport);
 $('resetBtn').addEventListener('click',resetAll);
 
 /* init */
@@ -1310,13 +1375,13 @@ computeAll();
 
   function syncSelectedBdmFromMonthState(){
     const bdm=getSelectedBdm();
-    if(!bdm || !adminAuthenticated) return;
+    if(!bdm) return;
     ensureMonthlyData(bdm);
     const dojDate=new Date(bdm.doj+'T00:00:00');
     Object.entries(monthState).forEach(([idx,vals])=>{
       const d=new Date(dojDate.getFullYear(),dojDate.getMonth()+Number(idx),1);
       const k=monthKey(d);
-      if(k<=currentMonth()) bdm.monthlyData[k]={wrp:toNum(vals?.wrp),adv:toNum(vals?.adv),lic:toNum(vals?.lic),ba:toNum(vals?.ba),gateDue:toNum(vals?.gateDue),gateCollected:toNum(vals?.gateCollected)};
+      if(k===currentMonth()) bdm.monthlyData[k]={wrp:toNum(vals?.wrp),adv:toNum(vals?.adv),lic:toNum(vals?.lic),ba:toNum(vals?.ba),gateDue:toNum(vals?.gateDue),gateCollected:toNum(vals?.gateCollected)};
     });
     const cm=bdm.monthlyData[currentMonth()]||cloneMonth();
     cm.gateDue=toNum($('gateDue').value); cm.gateCollected=toNum($('gateCollected').value); bdm.monthlyData[currentMonth()]=cm;
@@ -1325,13 +1390,19 @@ computeAll();
   }
 
   function applyCalculatorAccess(){
-    const editable=adminAuthenticated;
-    ['desig','doj','asof','gateDue','gateCollected'].forEach(id=>{
-      const el=$(id); if(el) el.disabled=true;
+    /* Everyone may update only the currently active KPI month. Profile/setup remains admin-only. */
+    ['desig','doj','asof'].forEach(id=>{ const el=$(id); if(el) el.disabled=true; });
+    ['gateDue','gateCollected'].forEach(id=>{ const el=$(id); if(el) el.disabled=false; });
+    const bdm=getSelectedBdm();
+    const dojDate=bdm?new Date(bdm.doj+'T00:00:00'):null;
+    document.querySelectorAll('#monthList input').forEach(el=>{
+      const i=Number(el.dataset.i);
+      const monthKeyForInput=dojDate?monthKey(new Date(dojDate.getFullYear(),dojDate.getMonth()+i,1)):'';
+      el.disabled=!bdm || monthKeyForInput!==currentMonth();
     });
-    document.querySelectorAll('#monthList input').forEach(el=>{ el.disabled=!editable; });
     $('shareBtn').disabled=false;
-    $('resetBtn').disabled=!editable;
+    $('downloadReportBtn').disabled=false;
+    $('resetBtn').disabled=!adminAuthenticated;
   }
 
   function branchDuplicate(name,ignoreId=''){
@@ -1451,11 +1522,16 @@ computeAll();
 
   /* Persist edits made through the original Monthly Achievements controls. */
   $('monthList').addEventListener('input',e=>{
-    if(!adminAuthenticated || !e.target.matches('input[data-i][data-k]')) return;
+    if(!e.target.matches('input[data-i][data-k]')) return;
+    const bdm=getSelectedBdm(); if(!bdm) return;
+    const dojDate=new Date(bdm.doj+'T00:00:00');
+    const i=Number(e.target.dataset.i);
+    const inputMonth=monthKey(new Date(dojDate.getFullYear(),dojDate.getMonth()+i,1));
+    if(inputMonth!==currentMonth()){ showToast('Only the current month can be edited.'); applyManagerToCalculator(bdm); applyCalculatorAccess(); return; }
     syncSelectedBdmFromMonthState();
   });
-  $('gateDue').addEventListener('input',()=>{if(adminAuthenticated)syncSelectedBdmFromMonthState();});
-  $('gateCollected').addEventListener('input',()=>{if(adminAuthenticated)syncSelectedBdmFromMonthState();});
+  $('gateDue').addEventListener('input',()=>syncSelectedBdmFromMonthState());
+  $('gateCollected').addEventListener('input',()=>syncSelectedBdmFromMonthState());
   $('resetBtn').addEventListener('click',e=>{
     if(!adminAuthenticated){e.preventDefault();showToast('Only Admin can reset KPI data.');return;}
     // The original reset handler is still bound; after it runs, persist the cleared values for the selected BDM.
