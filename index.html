@@ -1037,16 +1037,15 @@ function computeAll(){
   $('dialSub').textContent='Current KPI · DOJ → current month';
   $('dialName').textContent='Current Till-Date KPI · DOJ → M'+vi;
 
-  /* Promotion dial: reverse the earlier shortfall view.
-     Show achievement already completed toward the promotion KPI, using the
-     same till-date KPI logic. The remaining shortfall is shown separately
-     below as a negative number. */
-  const promotionProgress=Math.min(Math.max(tillTotal,0),100);
-  const promotionShortfall=Math.min(tillTotal-100,0);
+  /* Promotion dial: annual/promotion target basis.
+     The four promotion vectors use their complete target from the DESIG
+     annual target columns (not the current-month or YTD target). */
+  const promotionProgress=Math.min(Math.max(total,0),100);
+  const promotionShortfall=Math.min(total-100,0);
   $('promoGaugeFill').setAttribute('stroke-dasharray',promotionProgress+' 100');
-  $('promoDialPct').textContent=tillTotal.toFixed(1)+'%';
-  $('promoDialSub').textContent='Achievement completed · Shortfall '+promotionShortfall.toFixed(1)+'%';
-  $('promoDialName').textContent=tillTotal>=100 ? 'Promotion KPI · Qualified at 100%' : 'Promotion KPI Achievement · Target 100%';
+  $('promoDialPct').textContent=total.toFixed(1)+'%';
+  $('promoDialSub').textContent='Promotion achievement · Annual target basis · Shortfall '+promotionShortfall.toFixed(1)+'%';
+  $('promoDialName').textContent=total>=100 ? 'Promotion KPI · Qualified at 100%' : 'Promotion KPI Achievement · Annual Target';
 
   const shortfall=(ach,target)=>Math.min((ach||0)-(target||0),0);
   $('promoWrp').innerHTML='Achievement '+inr(wrpAch)+' / Target '+inr(cfg.wrp)+'<br>Shortfall '+inr(shortfall(wrpAch,cfg.wrp));
