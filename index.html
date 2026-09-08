@@ -42,8 +42,8 @@
     position:sticky; top:0; z-index:50;
     background:linear-gradient(160deg,var(--navy) 0%, var(--navy-2) 65%, var(--navy-3) 100%);
     color:#fff;
-    padding:14px 18px 16px;
-    box-shadow:0 8px 24px rgba(15,36,56,.28);
+    padding:8px 14px 9px;
+    box-shadow:0 6px 18px rgba(15,36,56,.24);
   }
   .dash-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .brand{display:flex;align-items:center;gap:9px;}
@@ -87,32 +87,38 @@
   .reset-btn:hover{background:rgba(255,255,255,.2);}
   .reset-btn:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px;}
 
-  .dial-pair{display:flex;justify-content:space-between;gap:12px;margin-top:10px;}
-  .dial-unit{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;}
-  .dial-box{position:relative;width:100%;max-width:150px;height:82px;flex:none;}
-  .dial-box svg{width:100%;height:82px;overflow:visible;display:block;}
-  .dial-name{font-size:10px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;text-align:center;}
+  .dial-pair{display:flex;justify-content:center;gap:12px;margin-top:5px;}
+  .dial-unit{width:min(220px,100%);display:flex;flex-direction:column;align-items:center;min-width:0;}
+  .dial-box{position:relative;width:100%;max-width:210px;height:106px;flex:none;}
+  .dial-box svg{width:100%;height:106px;overflow:visible;display:block;}
+  .dial-name{font-size:10px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;text-align:center;}
   .dial-label{
     position:absolute;left:0;right:0;bottom:2px;text-align:center;
   }
   .dial-label .pct{font-family:'Space Grotesk';font-weight:700;font-size:23px;line-height:1;}
   .dial-label .sub{font-size:9px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
 
-  .dash-status{margin-top:12px;}
+  .dash-status{margin-top:5px;display:flex;align-items:stretch;gap:8px;}
   .pill{
     display:inline-flex;align-items:center;gap:6px;
     padding:6px 12px;border-radius:999px;
     font-size:12.5px;font-weight:700;
-    margin-bottom:8px;
+    margin-bottom:0;
+    align-self:center;
+    padding:5px 9px;
+    font-size:10.5px;
+    white-space:nowrap;
   }
   .pill.ok{background:var(--success-bg);color:#1D7A52;}
   .pill.warn{background:var(--amber-bg);color:#96601C;}
   .pill.bad{background:var(--danger-bg);color:#A63A2C;}
   .pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
 
-  .breakdown-mini{display:flex;gap:10px;flex-wrap:wrap;}
-  .bm-item{font-size:11px;color:#CFDCE8;}
-  .bm-item b{color:#fff;font-family:'IBM Plex Mono';font-weight:600;}
+  .breakdown-mini{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:0;flex:1;}
+  .bm-item{font-size:10px;color:#CFDCE8;padding:5px 7px;border:1px solid rgba(255,255,255,.11);border-radius:9px;background:rgba(255,255,255,.05);min-width:0;}
+  .bm-item span{display:block;font-size:8px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.35px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bm-item b{display:block;color:#fff;font-family:'IBM Plex Mono';font-weight:700;font-size:13px;line-height:1.05;margin-top:2px;}
+  .bm-item small{display:block;color:#D6E0E8;font-size:7.5px;line-height:1.2;margin-top:2px;white-space:normal;}
 
   /* ---------- Layout ---------- */
   .content{padding:16px 14px 0;}
@@ -270,7 +276,7 @@
 
   /* ---------- Simple Branch / BDM selector + Admin access ---------- */
   .selector-strip{
-    margin-top:10px;
+    margin-top:6px;
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:8px;
@@ -376,6 +382,10 @@
     .viewer-label,.top-info-label{font-size:7px;}
     .designation-chip{max-width:125px;}
     .selector-strip{grid-template-columns:1fr;}
+    .breakdown-mini{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .dash-status{display:block;margin-top:5px;}
+    .dash-status .pill{display:flex;width:max-content;margin-bottom:5px;}
+    .bm-item{padding:5px 6px;}
     .admin-row2{grid-template-columns:1fr;}
     .admin-box-head{flex-direction:column;}
     .admin-head-actions{width:100%;justify-content:stretch;}
@@ -510,54 +520,33 @@
     <div class="dial-pair">
       <div class="dial-unit">
         <div class="dial-box">
-          <svg viewBox="0 0 150 90">
+          <svg viewBox="0 0 210 106" aria-label="Till-date KPI from date of joining">
             <defs>
               <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#C24A3B"/>
                 <stop offset="50%" stop-color="#C98A2C"/>
-                <stop offset="100%" stop-color="#E8C97A"/>
-              </linearGradient>
-            </defs>
-            <path d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="12" stroke-linecap="round" pathLength="100"/>
-            <path id="gaugeFill" d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-          </svg>
-          <div class="dial-label">
-            <div class="pct" id="dialPct">0%</div>
-            <div class="sub">Full-year score</div>
-          </div>
-        </div>
-        <div class="dial-name">Annual Target</div>
-      </div>
-
-      <div class="dial-unit">
-        <div class="dial-box">
-          <svg viewBox="0 0 150 90">
-            <defs>
-              <linearGradient id="gaugeGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#8A2E22"/>
-                <stop offset="50%" stop-color="#2E6A9E"/>
                 <stop offset="100%" stop-color="#63C9A8"/>
               </linearGradient>
             </defs>
-            <path d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="12" stroke-linecap="round" pathLength="100"/>
-            <path id="gaugeFill2" d="M12,80 A63,63 0 0 1 138,80" fill="none" stroke="url(#gaugeGrad2)" stroke-width="12" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+            <path d="M18,94 A87,87 0 0 1 192,94" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="13" stroke-linecap="round" pathLength="100"/>
+            <path id="gaugeFill" d="M18,94 A87,87 0 0 1 192,94" fill="none" stroke="url(#gaugeGrad)" stroke-width="13" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" style="transition:stroke-dasharray .55s ease"/>
           </svg>
           <div class="dial-label">
-            <div class="pct" id="dialPct2">0%</div>
-            <div class="sub" id="dialSub2">Till-date pace</div>
+            <div class="pct" id="dialPct">0%</div>
+            <div class="sub" id="dialSub">Till-date KPI from DOJ</div>
           </div>
         </div>
-        <div class="dial-name" id="dialName2">Till M0 Pace</div>
+        <div class="dial-name" id="dialName">Till-Date KPI · DOJ → Current Month</div>
       </div>
     </div>
 
     <div class="dash-status">
       <div class="pill warn" id="qualPill"><span class="dot"></span><span id="qualPillText">Fill in your details</span></div>
       <div class="breakdown-mini">
-        <div class="bm-item">WRP <b id="bmWrp">0%</b></div>
-        <div class="bm-item">Advisor <b id="bmAdv">0%</b></div>
-        <div class="bm-item">License <b id="bmLic">0%</b></div>
-        <div class="bm-item">BA <b id="bmBa">0%</b></div>
+        <div class="bm-item"><span>WRP</span><b id="bmWrp">0%</b><small id="bmWrpTA">Target ₹0 · Ach ₹0</small></div>
+        <div class="bm-item"><span>Advisor Active</span><b id="bmAdv">0%</b><small id="bmAdvTA">Target 0 · Ach 0</small></div>
+        <div class="bm-item"><span>License Active</span><b id="bmLic">0%</b><small id="bmLicTA">Target 0 · Ach 0</small></div>
+        <div class="bm-item"><span>BA Active</span><b id="bmBa">0%</b><small id="bmBaTA">Target 0 · Ach 0</small></div>
       </div>
     </div>
   </div>
@@ -1008,21 +997,21 @@ function computeAll(){
   }
 
   /* dashboard */
-  const dialPct=Math.min(total,100);
+  const dialPct=Math.min(tillTotal,100);
   $('gaugeFill').setAttribute('stroke-dasharray',dialPct+' 100');
-  $('dialPct').textContent=total.toFixed(1)+'%';
-  $('bmWrp').textContent=wrpPct.toFixed(0)+'%';
-  $('bmAdv').textContent=advPct.toFixed(0)+'%';
-  $('bmLic').textContent=licPct.toFixed(0)+'%';
-  $('bmBa').textContent=baPct.toFixed(0)+'%';
+  $('dialPct').textContent=tillTotal.toFixed(1)+'%';
+  $('dialSub').textContent='DOJ → current month';
+  $('dialName').textContent='Till-Date KPI · DOJ → M'+vi;
+  $('bmWrp').textContent=tWrpPct.toFixed(0)+'%';
+  $('bmAdv').textContent=tAdvPct.toFixed(0)+'%';
+  $('bmLic').textContent=tLicPct.toFixed(0)+'%';
+  $('bmBa').textContent=tBaPct.toFixed(0)+'%';
+  $('bmWrpTA').textContent='Target '+inr(tillWrp)+' · Ach '+inr(wrpToDate);
+  $('bmAdvTA').textContent='Target '+tillAdv+' · Ach '+advToDate;
+  $('bmLicTA').textContent='Target '+tillLic+' · Ach '+licToDate;
+  $('bmBaTA').textContent='Target '+tillBa+' · Ach '+baToDate;
   $('chipDesignation').textContent='Designation: '+cfg.label;
   $('chipVintage').textContent='M'+vi+' · Vintage';
-
-  const dialPct2=Math.min(tillTotal,100);
-  $('gaugeFill2').setAttribute('stroke-dasharray',dialPct2+' 100');
-  $('dialPct2').textContent=tillTotal.toFixed(1)+'%';
-  $('dialSub2').textContent='vs target thru M'+vi;
-  $('dialName2').textContent='Till M'+vi+' Pace';
 
   const scoreOk = total>=100;
   const gateBlocking = gateApplicable && gatePass===false;
