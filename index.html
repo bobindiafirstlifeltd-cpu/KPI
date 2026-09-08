@@ -87,9 +87,10 @@
   .reset-btn:hover{background:rgba(255,255,255,.2);}
   .reset-btn:focus-visible{outline:2px solid var(--gold-light);outline-offset:2px;}
 
-  .dial-pair{display:flex;justify-content:center;gap:12px;margin-top:5px;}
-  .dial-unit{width:min(220px,100%);display:flex;flex-direction:column;align-items:center;min-width:0;}
+  .dial-pair{display:flex;justify-content:center;gap:18px;margin-top:5px;align-items:flex-start;}
+  .dial-unit{width:min(220px,50%);display:flex;flex-direction:column;align-items:center;min-width:0;}
   .dial-box{position:relative;width:100%;max-width:210px;height:106px;flex:none;}
+  .promotion-dial .dial-name{color:#F2D38A;}
   .dial-box svg{width:100%;height:106px;overflow:visible;display:block;}
   .dial-name{font-size:10px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;text-align:center;}
   .dial-label{
@@ -99,6 +100,11 @@
   .dial-label .sub{font-size:9px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
 
   .dash-status{margin-top:5px;display:flex;align-items:stretch;gap:8px;}
+  .promotion-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:6px;}
+  .promo-item{padding:5px 7px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.045);min-width:0;}
+  .promo-item span{display:block;font-size:8px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.35px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .promo-item b{display:block;font-size:9px;line-height:1.35;color:#fff;font-family:'IBM Plex Mono',monospace;white-space:normal;}
+  .promo-caption{font-size:8px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.35px;margin:6px 0 2px;font-weight:800;}
   .pill{
     display:inline-flex;align-items:center;gap:6px;
     padding:6px 12px;border-radius:999px;
@@ -119,6 +125,7 @@
   .bm-item span{display:block;font-size:8px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.35px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .bm-item b{display:block;color:#fff;font-family:'IBM Plex Mono';font-weight:700;font-size:13px;line-height:1.05;margin-top:2px;}
   .bm-item small{display:block;color:#D6E0E8;font-size:7.5px;line-height:1.2;margin-top:2px;white-space:normal;}
+  @media(max-width:620px){.dial-pair{gap:8px}.dial-unit{width:50%}.dial-box{max-width:180px;height:96px}.dial-box svg{height:96px}.promotion-summary{grid-template-columns:repeat(2,minmax(0,1fr));}.dash-status{flex-direction:column;gap:4px}.breakdown-mini{width:100%;}}
 
   /* ---------- Layout ---------- */
   .content{padding:16px 14px 0;}
@@ -538,6 +545,26 @@
         </div>
         <div class="dial-name" id="dialName">Till-Date KPI · DOJ → Current Month</div>
       </div>
+      <div class="dial-unit promotion-dial">
+        <div class="dial-box">
+          <svg viewBox="0 0 210 106" aria-label="Promotion KPI progress and shortfall">
+            <defs>
+              <linearGradient id="promoGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#C24A3B"/>
+                <stop offset="55%" stop-color="#C98A2C"/>
+                <stop offset="100%" stop-color="#63C9A8"/>
+              </linearGradient>
+            </defs>
+            <path d="M18,94 A87,87 0 0 1 192,94" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="13" stroke-linecap="round" pathLength="100"/>
+            <path id="promoGaugeFill" d="M18,94 A87,87 0 0 1 192,94" fill="none" stroke="url(#promoGaugeGrad)" stroke-width="13" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" style="transition:stroke-dasharray .55s ease"/>
+          </svg>
+          <div class="dial-label">
+            <div class="pct" id="promoDialPct">0%</div>
+            <div class="sub" id="promoDialSub">Promotion KPI progress</div>
+          </div>
+        </div>
+        <div class="dial-name" id="promoDialName">Promotion Target · TD 100%</div>
+      </div>
     </div>
 
     <div class="dash-status">
@@ -548,6 +575,13 @@
         <div class="bm-item"><span>License Active</span><b id="bmLic">0%</b><small id="bmLicTA">Target 0 · Ach 0</small></div>
         <div class="bm-item"><span>BA Active</span><b id="bmBa">0%</b><small id="bmBaTA">Target 0 · Ach 0</small></div>
       </div>
+    </div>
+    <div class="promo-caption">Till-date target vs achievement · Promotion target vs achievement</div>
+    <div class="promotion-summary">
+      <div class="promo-item"><span>WRP</span><b id="promoWrp">TD ₹0 / ₹0<br>Promotion ₹0 / ₹0</b></div>
+      <div class="promo-item"><span>Advisor Active</span><b id="promoAdv">TD 0 / 0<br>Promotion 0 / 0</b></div>
+      <div class="promo-item"><span>License Active</span><b id="promoLic">TD 0 / 0<br>Promotion 0 / 0</b></div>
+      <div class="promo-item"><span>BA Confirmation</span><b id="promoBa">TD 0 / 0<br>Promotion 0 / 0</b></div>
     </div>
   </div>
 
@@ -1000,8 +1034,22 @@ function computeAll(){
   const dialPct=Math.min(tillTotal,100);
   $('gaugeFill').setAttribute('stroke-dasharray',dialPct+' 100');
   $('dialPct').textContent=tillTotal.toFixed(1)+'%';
-  $('dialSub').textContent='DOJ → current month';
-  $('dialName').textContent='Till-Date KPI · DOJ → M'+vi;
+  $('dialSub').textContent='Current KPI · DOJ → current month';
+  $('dialName').textContent='Current Till-Date KPI · DOJ → M'+vi;
+
+  /* Promotion dial: same complete till-date targets for all four vectors,
+     displayed as progress toward the 100% promotion KPI threshold. */
+  const promotionProgress=Math.min(tillTotal,100);
+  const promotionShortfall=Math.max(100-tillTotal,0);
+  $('promoGaugeFill').setAttribute('stroke-dasharray',promotionProgress+' 100');
+  $('promoDialPct').textContent=promotionShortfall>0 ? promotionShortfall.toFixed(1)+'%' : '0%';
+  $('promoDialSub').textContent=promotionShortfall>0 ? 'KPI shortfall to promotion' : 'Promotion KPI achieved';
+  $('promoDialName').textContent=promotionShortfall>0 ? 'Promotion Shortfall · Target 100%' : 'Promotion KPI · Qualified at 100%';
+
+  $('promoWrp').innerHTML='TD '+inr(wrpToDate)+' / '+inr(tillWrp)+'<br>Promotion '+inr(wrpAch)+' / '+inr(cfg.wrp);
+  $('promoAdv').innerHTML='TD '+advToDate+' / '+tillAdv+'<br>Promotion '+advAch+' / '+cfg.adv;
+  $('promoLic').innerHTML='TD '+licToDate+' / '+tillLic+'<br>Promotion '+licAch+' / '+cfg.lic;
+  $('promoBa').innerHTML='TD '+baToDate+' / '+tillBa+'<br>Promotion '+baAch+' / '+cfg.ba;
   $('bmWrp').textContent=tWrpPct.toFixed(0)+'%';
   $('bmAdv').textContent=tAdvPct.toFixed(0)+'%';
   $('bmLic').textContent=tLicPct.toFixed(0)+'%';
