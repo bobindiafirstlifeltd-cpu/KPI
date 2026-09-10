@@ -37,13 +37,15 @@
   h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
   .mono{font-family:'IBM Plex Mono',monospace;}
 
-  /* ---------- Sticky Dashboard ---------- */
+  /* ---------- Dashboard header (scrolls with the page — not fixed/sticky,
+     so the whole page is always reachable by a normal scroll on mobile) ---------- */
   .dash{
-    position:sticky; top:0; z-index:50;
+    position:relative;
     background:linear-gradient(160deg,var(--navy) 0%, var(--navy-2) 65%, var(--navy-3) 100%);
     color:#fff;
-    padding:8px 14px 9px;
+    padding:14px 14px 16px;
     box-shadow:0 6px 18px rgba(15,36,56,.24);
+    border-radius:0 0 20px 20px;
   }
   .dash-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .brand{display:flex;align-items:center;gap:9px;}
@@ -93,6 +95,7 @@
   .promotion-dial .dial-name{color:#F2D38A;}
   .dial-box svg{width:100%;height:106px;overflow:visible;display:block;}
   .dial-name{font-size:10px;color:#B9C9D8;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;text-align:center;}
+  .dial-helper{text-align:center;font-size:10px;color:#C9D8E5;margin-top:6px;line-height:1.4;}
   .dial-label{
     position:absolute;left:0;right:0;bottom:2px;text-align:center;
   }
@@ -275,7 +278,6 @@
   }
   @media (min-width:900px){
     .wrap{max-width:1400px;}
-    .dash{border-radius:0;}
     .content{max-width:1400px;margin:0 auto;padding:20px 28px 0;}
   }
 
@@ -527,7 +529,7 @@
     <div class="dial-pair">
       <div class="dial-unit">
         <div class="dial-box">
-          <svg viewBox="0 0 210 106" aria-label="Till-date KPI from date of joining">
+          <svg viewBox="0 0 210 106" aria-label="Financial-year-to-date KPI, 1 April to today">
             <defs>
               <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#C24A3B"/>
@@ -540,14 +542,14 @@
           </svg>
           <div class="dial-label">
             <div class="pct" id="dialPct">0%</div>
-            <div class="sub" id="dialSub">Till-date KPI from DOJ</div>
+            <div class="sub" id="dialSub">This year, 1 Apr → today</div>
           </div>
         </div>
-        <div class="dial-name" id="dialName">Till-Date KPI · DOJ → Current Month</div>
+        <div class="dial-name" id="dialName">FY-to-Date KPI · 1 Apr → Today</div>
       </div>
       <div class="dial-unit promotion-dial">
         <div class="dial-box">
-          <svg viewBox="0 0 210 106" aria-label="Promotion KPI achievement progress">
+          <svg viewBox="0 0 210 106" aria-label="KPI achieved since date of joining">
             <defs>
               <linearGradient id="promoGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#C24A3B"/>
@@ -560,12 +562,13 @@
           </svg>
           <div class="dial-label">
             <div class="pct" id="promoDialPct">0%</div>
-            <div class="sub" id="promoDialSub">Promotion KPI progress</div>
+            <div class="sub" id="promoDialSub">Since joining → today</div>
           </div>
         </div>
-        <div class="dial-name" id="promoDialName">Promotion Target · TD 100%</div>
+        <div class="dial-name" id="promoDialName">Since-Joining KPI · DOJ → Today</div>
       </div>
     </div>
+    <div class="dial-helper">Left: this financial year so far (1 Apr → today) · Right: total progress since you joined</div>
 
     <div class="dash-status">
       <div class="pill warn" id="qualPill"><span class="dot"></span><span id="qualPillText">Fill in your details</span></div>
@@ -576,12 +579,12 @@
         <div class="bm-item"><span>BA Active</span><b id="bmBa">0%</b><small id="bmBaTA">Target 0 · Ach 0</small></div>
       </div>
     </div>
-    <div class="promo-caption">Till-date target vs achievement · Promotion target vs achievement</div>
+    <div class="promo-caption">Since-joining breakdown by category (right dial) · Full-year target vs achievement below</div>
     <div class="promotion-summary">
-      <div class="promo-item"><span>WRP</span><b id="promoWrp">TD ₹0 / ₹0<br>Promotion ₹0 / ₹0</b></div>
-      <div class="promo-item"><span>Advisor Active</span><b id="promoAdv">TD 0 / 0<br>Promotion 0 / 0</b></div>
-      <div class="promo-item"><span>License Active</span><b id="promoLic">TD 0 / 0<br>Promotion 0 / 0</b></div>
-      <div class="promo-item"><span>BA Confirmation</span><b id="promoBa">TD 0 / 0<br>Promotion 0 / 0</b></div>
+      <div class="promo-item"><span>WRP</span><b id="promoWrp">Full-Year ₹0 / ₹0<br>Shortfall ₹0</b></div>
+      <div class="promo-item"><span>Advisor Active</span><b id="promoAdv">Full-Year 0 / 0<br>Shortfall 0</b></div>
+      <div class="promo-item"><span>License Active</span><b id="promoLic">Full-Year 0 / 0<br>Shortfall 0</b></div>
+      <div class="promo-item"><span>BA Confirmation</span><b id="promoBa">Full-Year 0 / 0<br>Shortfall 0</b></div>
     </div>
   </div>
 
@@ -985,6 +988,27 @@ function computeAll(){
   const tBaPct=tillBa?baToDate/tillBa*100:0;
   const tillTotal=Math.min(tWrpPct,MAXCAP)*W_WRP+Math.min(tAdvPct,MAXCAP)*W_ADV+Math.min(tLicPct,MAXCAP)*W_LIC+Math.min(tBaPct,MAXCAP)*W_BA;
 
+  /* ---- FY-to-date pace: achievement vs the cumulative target from 1 April
+     of the current financial year through the current vintage month.
+     (If DOJ falls after 1 April, this naturally starts from DOJ instead,
+     since no months exist before M0.) ---- */
+  const fyStartYear = asof.getMonth()>=3 ? asof.getFullYear() : asof.getFullYear()-1;
+  const fyStartDate = new Date(fyStartYear,3,1);
+  let fyWrpTgt=0, fyAdvTgt=0, fyLicTgt=0, fyBaTgt=0;
+  let fyWrpAch=0, fyAdvAch=0, fyLicAch=0, fyBaAch=0;
+  for(let i=0;i<=vi;i++){
+    const t=targetsFor(d,i);
+    if(t.calDate<fyStartDate) continue;
+    fyWrpTgt+=t.wrp; fyAdvTgt+=t.adv; fyLicTgt+=t.lic; fyBaTgt+=t.ba;
+    const m=monthState[i];
+    if(m){ fyWrpAch+=m.wrp||0; fyAdvAch+=m.adv||0; fyLicAch+=m.lic||0; fyBaAch+=m.ba||0; }
+  }
+  const fWrpPct=fyWrpTgt?fyWrpAch/fyWrpTgt*100:0;
+  const fAdvPct=fyAdvTgt?fyAdvAch/fyAdvTgt*100:0;
+  const fLicPct=fyLicTgt?fyLicAch/fyLicTgt*100:0;
+  const fBaPct=fyBaTgt?fyBaAch/fyBaTgt*100:0;
+  const fyTotal=Math.min(fWrpPct,MAXCAP)*W_WRP+Math.min(fAdvPct,MAXCAP)*W_ADV+Math.min(fLicPct,MAXCAP)*W_LIC+Math.min(fBaPct,MAXCAP)*W_BA;
+
   /* KPI cards */
   $('wrpAch').textContent=inr(wrpAch); $('wrpTgt').textContent='of '+inr(cfg.wrp);
   $('advAch').textContent=advAch; $('advTgt').textContent='of '+cfg.adv;
@@ -1030,28 +1054,27 @@ function computeAll(){
     gs.textContent = (gatePass?'Gate Criteria Qualified — ':'Gate Criteria Not Met — ')+gatePct.toFixed(1)+'% (target 80%)';
   }
 
-  /* dashboard */
-  const dialPct=Math.min(tillTotal,100);
-  $('gaugeFill').setAttribute('stroke-dasharray',dialPct+' 100');
-  $('dialPct').textContent=tillTotal.toFixed(1)+'%';
-  $('dialSub').textContent='Current KPI · DOJ → current month';
-  $('dialName').textContent='Current Till-Date KPI · DOJ → M'+vi;
+  /* Dial 1 (left) = FY-to-date: how much KPI has been achieved since
+     1 April of the current financial year, up to today. */
+  const fyDialPct=Math.min(fyTotal,100);
+  $('gaugeFill').setAttribute('stroke-dasharray',fyDialPct+' 100');
+  $('dialPct').textContent=fyTotal.toFixed(1)+'%';
+  $('dialSub').textContent='This year, 1 Apr → today';
+  $('dialName').textContent='FY-to-Date KPI · 1 Apr → Today';
 
-  /* Promotion dial: annual/promotion target basis.
-     The four promotion vectors use their complete target from the DESIG
-     annual target columns (not the current-month or YTD target). */
-  const promotionProgress=Math.min(Math.max(total,0),100);
-  const promotionShortfall=Math.min(total-100,0);
-  $('promoGaugeFill').setAttribute('stroke-dasharray',promotionProgress+' 100');
-  $('promoDialPct').textContent=total.toFixed(1)+'%';
-  $('promoDialSub').textContent='Promotion achievement · Annual target basis · Shortfall '+promotionShortfall.toFixed(1)+'%';
-  $('promoDialName').textContent=total>=100 ? 'Promotion KPI · Qualified at 100%' : 'Promotion KPI Achievement · Annual Target';
+  /* Dial 2 (right) = Since Joining: KPI achieved from the date of
+     joining/promotion (DOJ) up to today, against the vintage/vector targets. */
+  const sinceJoinPct=Math.min(Math.max(tillTotal,0),100);
+  $('promoGaugeFill').setAttribute('stroke-dasharray',sinceJoinPct+' 100');
+  $('promoDialPct').textContent=tillTotal.toFixed(1)+'%';
+  $('promoDialSub').textContent='Since joining → today (M'+vi+')';
+  $('promoDialName').textContent='Since-Joining KPI · DOJ → Today';
 
   const shortfall=(ach,target)=>Math.min((ach||0)-(target||0),0);
-  $('promoWrp').innerHTML='Achievement '+inr(wrpAch)+' / Target '+inr(cfg.wrp)+'<br>Shortfall '+inr(shortfall(wrpAch,cfg.wrp));
-  $('promoAdv').innerHTML='Achievement '+advAch+' / Target '+cfg.adv+'<br>Shortfall '+shortfall(advAch,cfg.adv);
-  $('promoLic').innerHTML='Achievement '+licAch+' / Target '+cfg.lic+'<br>Shortfall '+shortfall(licAch,cfg.lic);
-  $('promoBa').innerHTML='Achievement '+baAch+' / Target '+cfg.ba+'<br>Shortfall '+shortfall(baAch,cfg.ba);
+  $('promoWrp').innerHTML='Full-Year '+inr(wrpAch)+' / '+inr(cfg.wrp)+'<br>Shortfall '+inr(shortfall(wrpAch,cfg.wrp));
+  $('promoAdv').innerHTML='Full-Year '+advAch+' / '+cfg.adv+'<br>Shortfall '+shortfall(advAch,cfg.adv);
+  $('promoLic').innerHTML='Full-Year '+licAch+' / '+cfg.lic+'<br>Shortfall '+shortfall(licAch,cfg.lic);
+  $('promoBa').innerHTML='Full-Year '+baAch+' / '+cfg.ba+'<br>Shortfall '+shortfall(baAch,cfg.ba);
   $('bmWrp').textContent=tWrpPct.toFixed(0)+'%';
   $('bmAdv').textContent=tAdvPct.toFixed(0)+'%';
   $('bmLic').textContent=tLicPct.toFixed(0)+'%';
