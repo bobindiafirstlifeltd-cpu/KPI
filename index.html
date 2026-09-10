@@ -437,7 +437,7 @@
       </div>
 
       <div id="adminManageView" style="display:none;">
-        <div class="status-line">Admin mode is active. Current-month KPI fields in the calculator below are editable. Select any BDM from the top selector to work on that person's data.</div>
+        <div class="status-line">Admin mode is active. Every KPI field — for any month, for the selected BDM — is editable below. Select any BDM from the top selector to work on that person's data.</div>
         <div class="admin-grid">
           <section class="admin-card">
             <h3>1. Branch</h3>
@@ -477,7 +477,7 @@
               </div>
             </form>
             <div id="bdmList" class="branch-list"></div>
-            <div class="readonly-note">All four KPI inputs (WRP, Active Advisor, License Active, BA Confirmation) are stored month-by-month from the BDM's joining month. Select the BDM above, then edit the current-month row in the existing Monthly Achievements section.</div>
+            <div class="readonly-note">All four KPI inputs (WRP, Active Advisor, License Active, BA Confirmation) are stored month-by-month from the BDM's joining month. Select the BDM above — while logged in as Admin you can edit any month's row directly in the Monthly Achievements section below.</div>
           </section>
         </div>
       </div>
@@ -1483,7 +1483,8 @@ computeAll();
     Object.entries(monthState).forEach(([idx,vals])=>{
       const d=new Date(dojDate.getFullYear(),dojDate.getMonth()+Number(idx),1);
       const k=monthKey(d);
-      if(k===currentMonth()) bdm.monthlyData[k]={wrp:toNum(vals?.wrp),adv:toNum(vals?.adv),lic:toNum(vals?.lic),ba:toNum(vals?.ba),gateDue:toNum(vals?.gateDue),gateCollected:toNum(vals?.gateCollected)};
+      const existing=bdm.monthlyData[k]||cloneMonth();
+      bdm.monthlyData[k]={wrp:toNum(vals?.wrp),adv:toNum(vals?.adv),lic:toNum(vals?.lic),ba:toNum(vals?.ba),gateDue:existing.gateDue,gateCollected:existing.gateCollected};
     });
     const cm=bdm.monthlyData[currentMonth()]||cloneMonth();
     cm.gateDue=toNum($('gateDue').value); cm.gateCollected=toNum($('gateCollected').value); bdm.monthlyData[currentMonth()]=cm;
@@ -1492,15 +1493,13 @@ computeAll();
   }
 
   function applyCalculatorAccess(){
-    /* Everyone may update only the currently active KPI month. Profile/setup remains admin-only. */
+    /* Master rights: once Admin is authenticated, every KPI input — any month,
+       any BDM — is editable. Everyone else (viewers) is fully read-only. */
     ['desig','doj','asof'].forEach(id=>{ const el=$(id); if(el) el.disabled=true; });
-    ['gateDue','gateCollected'].forEach(id=>{ const el=$(id); if(el) el.disabled=false; });
+    ['gateDue','gateCollected'].forEach(id=>{ const el=$(id); if(el) el.disabled=!adminAuthenticated; });
     const bdm=getSelectedBdm();
-    const dojDate=bdm?new Date(bdm.doj+'T00:00:00'):null;
     document.querySelectorAll('#monthList input').forEach(el=>{
-      const i=Number(el.dataset.i);
-      const monthKeyForInput=dojDate?monthKey(new Date(dojDate.getFullYear(),dojDate.getMonth()+i,1)):'';
-      el.disabled=!bdm || monthKeyForInput!==currentMonth();
+      el.disabled=!bdm || !adminAuthenticated;
     });
     $('shareBtn').disabled=false;
     $('downloadReportBtn').disabled=false;
@@ -1643,18 +1642,16 @@ computeAll();
     if(rem) removeBdm(rem);
   });
 
-  /* Persist edits made through the original Monthly Achievements controls. */
+  /* Persist edits made through the original Monthly Achievements controls.
+     Admin has master rights: any month, for the currently selected BDM. */
   $('monthList').addEventListener('input',e=>{
     if(!e.target.matches('input[data-i][data-k]')) return;
+    if(!requireAdmin()){ applyCalculatorAccess(); return; }
     const bdm=getSelectedBdm(); if(!bdm) return;
-    const dojDate=new Date(bdm.doj+'T00:00:00');
-    const i=Number(e.target.dataset.i);
-    const inputMonth=monthKey(new Date(dojDate.getFullYear(),dojDate.getMonth()+i,1));
-    if(inputMonth!==currentMonth()){ showToast('Only the current month can be edited.'); applyManagerToCalculator(bdm); applyCalculatorAccess(); return; }
     syncSelectedBdmFromMonthState();
   });
-  $('gateDue').addEventListener('input',()=>syncSelectedBdmFromMonthState());
-  $('gateCollected').addEventListener('input',()=>syncSelectedBdmFromMonthState());
+  $('gateDue').addEventListener('input',()=>{ if(!requireAdmin()) return; syncSelectedBdmFromMonthState(); });
+  $('gateCollected').addEventListener('input',()=>{ if(!requireAdmin()) return; syncSelectedBdmFromMonthState(); });
   $('resetBtn').addEventListener('click',e=>{
     if(!adminAuthenticated){e.preventDefault();showToast('Only Admin can reset KPI data.');return;}
     // The original reset handler is still bound; after it runs, persist the cleared values for the selected BDM.
